@@ -1,0 +1,639 @@
+2026-03-18 15:28:51,010 [INFO] Símbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-18 15:28:51,010 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-18 15:28:51,013 [INFO] Ciclo: 2026-03-18 15:28:51
+2026-03-18 15:28:51,287 [INFO] Saldo USDT disponível: $10000.00
+2026-03-18 15:28:51,288 [INFO] [BTCUSDT] Analisando...
+2026-03-18 15:28:52,265 [ERROR] Erro na análise Gemini para BTCUSDT: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+Please retry in 7.83095746s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 7
+}
+]
+2026-03-18 15:28:52,266 [INFO] [BTCUSDT] Preço: $71643.9400 (-3.75% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 15:28:52,266 [INFO] [BTCUSDT] Gemini: Erro na análise.
+2026-03-18 15:28:56,267 [INFO] [ETHUSDT] Analisando...
+2026-03-18 15:28:57,033 [ERROR] Erro na análise Gemini para ETHUSDT: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+Please retry in 3.06302315s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 3
+}
+]
+2026-03-18 15:28:57,034 [INFO] [ETHUSDT] Preço: $2194.5700 (-5.95% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 15:28:57,034 [INFO] [ETHUSDT] Gemini: Erro na análise.
+2026-03-18 15:29:01,035 [INFO] [BNBUSDT] Analisando...
+2026-03-18 15:29:01,805 [ERROR] Erro na análise Gemini para BNBUSDT: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+Please retry in 58.294248138s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 58
+}
+]
+2026-03-18 15:29:01,807 [INFO] [BNBUSDT] Preço: $649.5200 (-3.42% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 15:29:01,807 [INFO] [BNBUSDT] Gemini: Erro na análise.
+2026-03-18 15:29:05,808 [INFO] Ciclo concluído.
+2026-03-18 16:29:05,911 [INFO] Ciclo: 2026-03-18 16:29:05
+2026-03-18 16:29:06,695 [INFO] Saldo USDT disponível: $10000.00
+2026-03-18 16:29:06,696 [INFO] [BTCUSDT] Analisando...
+2026-03-18 16:29:08,296 [ERROR] Erro na análise Gemini para BTCUSDT: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+Please retry in 51.802678228s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 51
+}
+]
+2026-03-18 16:29:08,298 [INFO] [BTCUSDT] Preço: $71300.0000 (-4.38% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 16:29:08,298 [INFO] [BTCUSDT] Gemini: Erro na análise.
+2026-03-18 16:29:12,299 [INFO] [ETHUSDT] Analisando...
+2026-03-18 16:29:13,428 [ERROR] Erro na análise Gemini para ETHUSDT: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+Please retry in 46.670273095s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 46
+}
+]
+2026-03-18 16:29:13,431 [INFO] [ETHUSDT] Preço: $2193.7000 (-6.04% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 16:29:13,432 [INFO] [ETHUSDT] Gemini: Erro na análise.
+2026-03-18 16:29:17,433 [INFO] [BNBUSDT] Analisando...
+2026-03-18 16:29:18,209 [ERROR] Erro na análise Gemini para BNBUSDT: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+Please retry in 41.88684887s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 41
+}
+]
+2026-03-18 16:29:18,211 [INFO] [BNBUSDT] Preço: $649.3600 (-3.57% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 16:29:18,211 [INFO] [BNBUSDT] Gemini: Erro na análise.
+2026-03-18 16:29:22,213 [INFO] Ciclo concluído.
+2026-03-18 16:52:32,091 [INFO] Símbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-18 16:52:32,091 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-18 16:52:32,094 [INFO] Ciclo: 2026-03-18 16:52:32
+2026-03-18 16:52:32,387 [ERROR] Erro ao buscar saldo de USDT: APIError(code=-2014): API-key format invalid.
+2026-03-18 16:52:32,388 [INFO] Saldo USDT disponível: $0.00
+2026-03-18 16:52:32,388 [INFO] [BTCUSDT] Analisando...
+2026-03-18 16:52:33,508 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2026-03-18 16:52:33,510 [ERROR] Erro na análise LLM para BTCUSDT: Error code: 401 - {'error': {'message': 'Missing Authentication header', 'code': 401}}
+2026-03-18 16:52:33,511 [INFO] [BTCUSDT] Preço: $71068.7400 (-4.65% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 16:52:33,511 [INFO] [BTCUSDT] LLM: Erro na análise.
+2026-03-18 16:52:37,512 [INFO] [ETHUSDT] Analisando...
+2026-03-18 16:52:38,104 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2026-03-18 16:52:38,106 [ERROR] Erro na análise LLM para ETHUSDT: Error code: 401 - {'error': {'message': 'Missing Authentication header', 'code': 401}}
+2026-03-18 16:52:38,106 [INFO] [ETHUSDT] Preço: $2184.6500 (-5.87% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 16:52:38,106 [INFO] [ETHUSDT] LLM: Erro na análise.
+2026-03-18 16:52:42,107 [INFO] [BNBUSDT] Analisando...
+2026-03-18 16:52:43,275 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2026-03-18 16:52:43,276 [ERROR] Erro na análise LLM para BNBUSDT: Error code: 401 - {'error': {'message': 'Missing Authentication header', 'code': 401}}
+2026-03-18 16:52:43,276 [INFO] [BNBUSDT] Preço: $647.8300 (-3.60% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 16:52:43,277 [INFO] [BNBUSDT] LLM: Erro na análise.
+2026-03-18 16:52:47,278 [INFO] Ciclo concluído.
+2026-03-18 16:53:25,221 [INFO] Símbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-18 16:53:25,221 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-18 16:53:25,224 [INFO] Ciclo: 2026-03-18 16:53:25
+2026-03-18 16:53:25,521 [INFO] Saldo USDT disponível: $10000.00
+2026-03-18 16:53:25,521 [INFO] [BTCUSDT] Analisando...
+2026-03-18 16:53:27,197 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 16:53:27,199 [INFO] Retrying request to /chat/completions in 0.467035 seconds
+2026-03-18 16:53:27,969 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 16:53:27,969 [INFO] Retrying request to /chat/completions in 0.992721 seconds
+2026-03-18 16:53:29,256 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 16:53:29,258 [ERROR] Erro na análise LLM para BTCUSDT: Error code: 429 - {'error': {'message': 'Provider returned error', 'code': 429, 'metadata': {'raw': 'meta-llama/llama-3.3-70b-instruct:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations', 'provider_name': 'Venice', 'is_byok': False}}, 'user_id': 'user_3B8GFIHLBIKNR88JRkIZiZYM4Nk'}
+2026-03-18 16:53:29,258 [INFO] [BTCUSDT] Preço: $71029.3200 (-4.72% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 16:53:29,258 [INFO] [BTCUSDT] LLM: Erro na análise.
+2026-03-18 16:53:33,259 [INFO] [ETHUSDT] Analisando...
+2026-03-18 16:53:34,125 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 16:53:34,127 [INFO] Retrying request to /chat/completions in 0.424754 seconds
+2026-03-18 16:53:34,843 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 16:53:34,844 [INFO] Retrying request to /chat/completions in 0.824313 seconds
+2026-03-18 16:53:35,964 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 16:53:35,966 [ERROR] Erro na análise LLM para ETHUSDT: Error code: 429 - {'error': {'message': 'Provider returned error', 'code': 429, 'metadata': {'raw': 'meta-llama/llama-3.3-70b-instruct:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations', 'provider_name': 'Venice', 'is_byok': False}}, 'user_id': 'user_3B8GFIHLBIKNR88JRkIZiZYM4Nk'}
+2026-03-18 16:53:35,966 [INFO] [ETHUSDT] Preço: $2183.1100 (-5.93% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 16:53:35,967 [INFO] [ETHUSDT] LLM: Erro na análise.
+2026-03-18 16:53:39,968 [INFO] [BNBUSDT] Analisando...
+2026-03-18 16:53:40,884 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 16:53:40,886 [INFO] Retrying request to /chat/completions in 0.405756 seconds
+2026-03-18 16:53:41,575 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 16:53:41,577 [INFO] Retrying request to /chat/completions in 0.873670 seconds
+2026-03-18 16:53:42,597 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 16:53:42,598 [ERROR] Erro na análise LLM para BNBUSDT: Error code: 429 - {'error': {'message': 'Rate limit exceeded: limit_rpm/meta-llama/llama-3.3-70b-instruct/839b2e30-a1b4-4974-b980-3e534b5873b1. High demand for meta-llama/llama-3.3-70b-instruct:free on OpenRouter - limited to 8 requests per minute. Please retry shortly.', 'code': 429, 'metadata': {'headers': {'X-RateLimit-Limit': '8', 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': '1773863640000'}, 'provider_name': None}}, 'user_id': 'user_3B8GFIHLBIKNR88JRkIZiZYM4Nk'}
+2026-03-18 16:53:42,599 [INFO] [BNBUSDT] Preço: $647.7200 (-3.62% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 16:53:42,599 [INFO] [BNBUSDT] LLM: Erro na análise.
+2026-03-18 16:53:46,600 [INFO] Ciclo concluído.
+2026-03-18 17:00:53,686 [INFO] Símbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-18 17:00:53,686 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-18 17:00:53,688 [INFO] Ciclo: 2026-03-18 17:00:53
+2026-03-18 17:00:53,968 [INFO] Saldo USDT disponível: $10000.00
+2026-03-18 17:00:53,968 [INFO] [BTCUSDT] Analisando...
+2026-03-18 17:00:55,464 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 17:00:55,465 [INFO] Retrying request to /chat/completions in 0.437875 seconds
+2026-03-18 17:00:56,215 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 402 Payment Required"
+2026-03-18 17:00:56,217 [ERROR] Erro na análise LLM para BTCUSDT: Error code: 402 - {'error': {'message': 'Provider returned error', 'code': 402, 'metadata': {'raw': '{"error":"API key USD spend limit exceeded. Your account may still have USD balance, but this API key has reached its configured USD spending limit."}', 'provider_name': 'Venice', 'is_byok': False}}, 'user_id': 'user_3B8GFIHLBIKNR88JRkIZiZYM4Nk'}
+2026-03-18 17:00:56,219 [INFO] [BTCUSDT] Preço: $71016.9300 (-4.67% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 17:00:56,219 [INFO] [BTCUSDT] LLM: Erro na análise.
+2026-03-18 17:01:06,221 [INFO] [ETHUSDT] Analisando...
+2026-03-18 17:01:07,161 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 17:01:07,163 [INFO] Retrying request to /chat/completions in 0.467036 seconds
+2026-03-18 17:01:07,939 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 17:01:07,940 [INFO] Retrying request to /chat/completions in 0.987865 seconds
+2026-03-18 17:01:09,234 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-18 17:01:09,235 [ERROR] Erro na análise LLM para ETHUSDT: Error code: 429 - {'error': {'message': 'Provider returned error', 'code': 429, 'metadata': {'raw': 'meta-llama/llama-3.3-70b-instruct:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations', 'provider_name': 'Venice', 'is_byok': False}}, 'user_id': 'user_3B8GFIHLBIKNR88JRkIZiZYM4Nk'}
+2026-03-18 17:01:09,237 [INFO] [ETHUSDT] Preço: $2186.7800 (-5.84% 24h) | Sinal: HOLD | Confiança: 0%
+2026-03-18 17:01:09,238 [INFO] [ETHUSDT] LLM: Erro na análise.
+2026-03-18 17:04:22,322 [INFO] Símbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-18 17:04:22,322 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-18 17:04:22,324 [INFO] Ciclo: 2026-03-18 17:04:22
+2026-03-18 17:04:22,605 [INFO] Saldo USDT disponível: $10000.00
+2026-03-18 17:04:22,605 [INFO] [BTCUSDT] Analisando...
+2026-03-18 17:04:24,843 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 17:04:36,427 [INFO] [BTCUSDT] Preço: $70947.8400 (-4.74% 24h) | Sinal: HOLD | Confiança: 60%
+2026-03-18 17:04:36,427 [INFO] [BTCUSDT] LLM: As últimas 3 horas mostram queda consistente nos preços, mas o volume do último período está significativamente abaixo da média de 5h, indicando falta de confirmação da pressão vendedora.
+2026-03-18 17:04:46,428 [INFO] [ETHUSDT] Analisando...
+2026-03-18 17:04:52,397 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 17:04:53,936 [INFO] [ETHUSDT] Preço: $2183.4600 (-6.01% 24h) | Sinal: SELL | Confiança: 85%
+2026-03-18 17:04:53,937 [INFO] [ETHUSDT] LLM: O preço de ETHUSDT caiu significativamente nas últimas 24 horas (-6.007%) com uma grande variação entre alta e baixa, indicando forte pressão vendedora. O volume recente está acima da média, confirmando a tendência de baixa.
+2026-03-18 17:05:04,781 [INFO] [BNBUSDT] Analisando...
+2026-03-18 17:05:17,326 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 17:05:23,384 [INFO] [BNBUSDT] Preço: $647.3100 (-3.56% 24h) | Sinal: HOLD | Confiança: 45%
+2026-03-18 17:05:23,385 [INFO] [BNBUSDT] LLM: O preço mostra estabilidade nas últimas 5 horas com fechamentos quase constantes, porém o volume atual (90.107) está significativamente abaixo da média de 5h (435.42), indicando falta de confirmação de momentum. A queda de 3.56% em 24h sugere pressão vendedora, mas o baixo volume recente gera ambiguidade.
+2026-03-18 17:05:33,385 [INFO] Ciclo concluído.
+2026-03-18 17:11:55,638 [INFO] Símbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-18 17:11:55,639 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-18 17:11:55,641 [INFO] Ciclo: 2026-03-18 17:11:55
+2026-03-18 17:11:55,924 [INFO] Saldo USDT disponível: $12180.87
+2026-03-18 17:11:55,925 [INFO] [BTCUSDT] Analisando...
+2026-03-18 17:11:59,118 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 17:12:05,935 [INFO] [BTCUSDT] Preço: $70500.0000 (-5.35% 24h) | Sinal: HOLD | Confiança: 40%
+2026-03-18 17:12:05,936 [INFO] [BTCUSDT] LLM: O preço apresenta uma queda de 5.35% nas últimas 24h, mas o volume recente está abaixo da média. Os dados não mostram uma tendência clara de alta ou baixa.
+2026-03-18 17:12:15,937 [INFO] [ETHUSDT] Analisando...
+2026-03-18 17:12:17,690 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 17:12:20,121 [INFO] [ETHUSDT] Preço: $2157.8900 (-7.08% 24h) | Sinal: HOLD | Confiança: 60%
+2026-03-18 17:12:20,121 [INFO] [ETHUSDT] LLM: Preço caiu levemente na última hora e o volume está abaixo da média das 5h, indicando falta de pressão clara de compra ou venda.
+2026-03-18 17:12:30,122 [INFO] [BNBUSDT] Analisando...
+2026-03-18 17:12:31,959 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 17:17:55,864 [WARNING] Tentativa 1 falhou para BNBUSDT: 'NoneType' object has no attribute 'strip' — aguardando 15s
+2026-03-18 17:18:13,898 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 17:18:16,153 [INFO] [BNBUSDT] Preço: $645.9000 (-3.80% 24h) | Sinal: HOLD | Confiança: 55%
+2026-03-18 17:18:16,154 [INFO] [BNBUSDT] LLM: Price fell 3.8% with only modest recent volume, indicating weak selling pressure.
+2026-03-18 17:18:26,156 [INFO] Ciclo concluído.
+2026-03-18 17:37:40,385 [INFO] Crypto Bot iniciado — OpenRouter + Binance TESTNET (sem dinheiro real)
+2026-03-18 17:37:40,386 [INFO] Símbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-18 17:37:40,387 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-18 17:37:40,393 [INFO] Ciclo: 2026-03-18 17:37:40
+2026-03-18 17:37:40,686 [INFO] Saldo USDT disponível: $12180.87
+2026-03-18 17:37:40,687 [INFO] [BTCUSDT] Analisando...
+2026-03-18 17:37:48,320 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 17:37:49,765 [INFO] [BTCUSDT] Preço: $71143.4100 (-4.59% 24h) | Sinal: SELL | Confiança: 75%
+2026-03-18 17:37:49,766 [INFO] [BTCUSDT] LLM: O preço do BTCUSDT apresentou uma queda significativa nas últimas 24 horas (-4.59%) e no gráfico de 5 horas, com volume de negociação acima da média. Essa combinação de queda e volume alto sugere pressão vendedora.
+2026-03-19 08:18:07,343 [INFO] Crypto Bot iniciado — OpenRouter + Binance TESTNET (sem dinheiro real)
+2026-03-19 08:18:07,349 [INFO] Símbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-19 08:18:07,373 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-19 08:18:07,379 [INFO] Ciclo: 2026-03-19 08:18:07
+2026-03-19 08:18:07,669 [INFO] Saldo USDT disponível: $83244.51
+2026-03-19 08:18:07,669 [INFO] [BTCUSDT] Analisando...
+2026-03-19 08:18:12,350 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-19 08:18:14,208 [INFO] [BTCUSDT] Preço: $70149.1500 (-5.20% 24h) | Sinal: HOLD | Confiança: 58%
+2026-03-19 08:18:14,208 [INFO] [BTCUSDT] LLM: Price dropped 5.2% in the last 24h with low recent volume, showing weak momentum and unclear direction, hence a HOLD is appropriate.
+2026-03-19 08:18:24,209 [INFO] [ETHUSDT] Analisando...
+2026-03-19 08:18:28,898 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-19 08:19:11,688 [INFO] [ETHUSDT] Preço: $2169.5200 (-6.28% 24h) | Sinal: HOLD | Confiança: 45%
+2026-03-19 08:19:11,688 [INFO] [ETHUSDT] LLM: Preço oscila sem tendência definida nas últimas 5h e volume recente está próximo da média, indicando falta de direção. A queda de 24h não é sustentada por volume vendedor elevado no momento.
+2026-03-19 08:19:21,690 [INFO] [BNBUSDT] Analisando...
+2026-03-19 08:19:26,071 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-19 08:19:28,045 [INFO] [BNBUSDT] Preço: $645.0100 (-4.11% 24h) | Sinal: HOLD | Confiança: 60%
+2026-03-19 08:19:28,046 [INFO] [BNBUSDT] LLM: Apesar da queda de 4.109% nas últimas 24 horas, o volume atual (12663.232) está acima da média das últimas 5 horas (389.17), indicando alguma atividade de compra. A tendência recente dos fechamentos em 5 horas é relativamente estável, sem uma direção clara.
+2026-03-19 08:19:38,047 [INFO] Ciclo concluído.
+2026-03-19 08:38:34,149 [INFO] Crypto Bot iniciado — OpenRouter + Binance TESTNET (sem dinheiro real)
+2026-03-19 08:38:34,149 [INFO] Símbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-19 08:38:34,150 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-19 08:38:34,154 [INFO] Ciclo: 2026-03-19 08:38:34
+2026-03-19 08:38:34,449 [INFO] Saldo USDT disponível: $83244.51
+2026-03-19 08:38:34,450 [INFO] [BTCUSDT] Analisando...
+2026-03-19 08:38:36,370 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-19 08:38:38,143 [INFO] [BTCUSDT] Preço: $70065.2800 (-3.91% 24h) | Sinal: SELL | Confiança: 75%
+2026-03-19 08:38:38,143 [INFO] [BTCUSDT] LLM: O preço do BTCUSDT apresentou uma queda de 3.909% nas últimas 24 horas e fechou a última hora em um nível inferior ao fechamento da vela anterior. O volume atual (29.12432) está acima da média das últimas 5 horas (84.04), indicando pressão vendedora.
+2026-03-19 08:38:49,015 [INFO] [ETHUSDT] Analisando...
+2026-03-19 08:38:59,658 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-19 08:39:02,606 [INFO] [ETHUSDT] Preço: $2168.2700 (-4.42% 24h) | Sinal: HOLD | Confiança: 45%
+2026-03-19 08:39:02,606 [INFO] [ETHUSDT] LLM: O volume atual está acima da média dos últimos 5h, mas a variação recente é volátil. A tendência não é clara o suficiente para definir uma direção com confiança.
+2026-03-19 08:39:15,764 [INFO] Crypto Bot iniciado — OpenRouter + Binance TESTNET (sem dinheiro real)
+2026-03-19 08:39:15,765 [INFO] Símbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-19 08:39:15,766 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-19 08:39:15,775 [INFO] Ciclo: 2026-03-19 08:39:15
+2026-03-19 08:39:16,063 [INFO] Saldo USDT disponível: $83244.51
+2026-03-19 08:39:16,064 [INFO] [BTCUSDT] Analisando...
+2026-03-19 08:39:18,139 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-19 08:39:19,438 [INFO] [BTCUSDT] Preço: $70057.2700 (-3.93% 24h) | Sinal: HOLD | Confiança: 55%
+2026-03-19 08:39:19,439 [INFO] [BTCUSDT] LLM: O preço apresenta leve queda na última hora, mas o volume recente está abaixo da média de 5 horas. Os sinais são ambíguos e não há confirmação forte de tendência.
+2026-03-19 08:39:29,440 [INFO] [ETHUSDT] Analisando...
+2026-03-19 08:39:31,614 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-19 08:40:21,984 [INFO] [ETHUSDT] Preço: $2168.6200 (-4.42% 24h) | Sinal: HOLD | Confiança: 50%
+2026-03-19 08:40:31,989 [INFO] [BNBUSDT] Analisando...
+2026-03-19 08:40:42,474 [INFO] HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-19 08:40:55,106 [INFO] [BNBUSDT] Preço: $643.8100 (-2.73% 24h) | Sinal: SELL | Confiança: 75%
+2026-03-19 08:40:55,106 [INFO] [BNBUSDT] LLM: O preço apresentou uma queda significativa de 2.73% nas últimas 24 horas, acompanhada de um volume relativamente alto.  A tendência de alta nos últimos 5 fechamentos foi interrompida, indicando uma possível reversão.
+2026-03-19 08:40:55,990 [INFO] [BNBUSDT] SELL 0.999 BNB @ ~$643.81 — ID: 6416454
+2026-03-19 08:41:05,992 [INFO] Ciclo concluído.
+2026-03-19 09:07:01,188 [INFO] Crypto Bot iniciado -- OpenRouter + Binance TESTNET (sem dinheiro real)
+2026-03-19 09:07:01,189 [INFO] Simbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-19 09:07:01,190 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-19 09:07:01,191 [INFO] -------------------------------------------------------
+2026-03-19 09:07:01,191 [INFO] Ciclo: 2026-03-19 09:07:01
+2026-03-19 09:07:02,022 [INFO] Saldo USDT disponivel: $83887.63
+2026-03-19 09:07:02,023 [INFO] [BTCUSDT] Analisando...
+2026-03-19 09:07:08,821 [INFO] [BTCUSDT] Preco: $69692.1200 (-4.44% 24h) | Sinal: SELL | Confianca: 85%
+2026-03-19 09:07:08,821 [INFO] [BTCUSDT] LLM: Price has fallen 4.44% in 24h with a significant volume spike, indicating strong selling pressure.
+2026-03-19 09:07:09,685 [ERROR] [BTCUSDT] [ERRO] Binance: APIError(code=-1013): Filter failure: LOT_SIZE
+2026-03-19 09:07:19,686 [INFO] [ETHUSDT] Analisando...
+2026-03-19 09:07:24,729 [INFO] [ETHUSDT] Preco: $2158.4900 (-4.65% 24h) | Sinal: SELL | Confianca: 85%
+2026-03-19 09:07:24,730 [INFO] [ETHUSDT] LLM: The price has declined ~4.6% in 24h with a clear downtrend over the last 5 closes, and today's massive volume confirms strong selling pressure.
+2026-03-19 09:07:25,609 [ERROR] [ETHUSDT] [ERRO] Binance: APIError(code=-1013): Filter failure: LOT_SIZE
+2026-03-19 09:07:35,610 [INFO] [BNBUSDT] Analisando...
+2026-03-19 09:07:53,245 [INFO] [BNBUSDT] Preco: $642.6300 (-2.74% 24h) | Sinal: HOLD | Confianca: 45%
+2026-03-19 09:07:53,246 [INFO] [BNBUSDT] LLM: Tend?ncia de queda nas ?ltimas horas, mas volume atual (20.674) muito abaixo da m?dia de 5h (312.66), indicando falta de impulso vendedor consistente.
+2026-03-19 09:08:03,247 [INFO] Ciclo concluido.
+2026-03-19 09:09:46,451 [INFO] Crypto Bot iniciado -- OpenRouter + Binance TESTNET (sem dinheiro real)
+2026-03-19 09:09:46,452 [INFO] Simbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-19 09:09:46,452 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-19 09:09:46,452 [INFO] -------------------------------------------------------
+2026-03-19 09:09:46,453 [INFO] Ciclo: 2026-03-19 09:09:46
+2026-03-19 09:09:46,735 [INFO] Saldo USDT disponivel: $83887.63
+2026-03-19 09:09:46,736 [INFO] [BTCUSDT] Analisando...
+2026-03-19 09:09:51,821 [INFO] [BTCUSDT] Preco: $69655.5500 (-4.26% 24h) | Sinal: HOLD | Confianca: 42%
+2026-03-19 09:09:51,821 [INFO] [BTCUSDT] LLM: Price has declined over the last 5 hours with below?average volume, indicating weak momentum and uncertainty. Thus a neutral HOLD is advised.
+2026-03-19 09:10:01,822 [INFO] [ETHUSDT] Analisando...
+2026-03-19 09:10:05,291 [INFO] [ETHUSDT] Preco: $2159.4300 (-4.40% 24h) | Sinal: SELL | Confianca: 85%
+2026-03-19 09:10:05,292 [INFO] [ETHUSDT] LLM: Queda de 4.398% nas ?ltimas 24 horas, com alta volatilidade (diferen?a entre high e low) e volume 24h significativamente acima da m?dia de 5h, indicando forte press?o vendedora.
+2026-03-19 09:10:06,481 [ERROR] [ETHUSDT] [ERRO] Binance: APIError(code=-1013): Filter failure: NOTIONAL
+2026-03-19 09:10:16,483 [INFO] [BNBUSDT] Analisando...
+2026-03-19 09:10:24,850 [INFO] [BNBUSDT] Preco: $642.4600 (-2.70% 24h) | Sinal: HOLD | Confianca: 55%
+2026-03-19 09:10:24,850 [INFO] [BNBUSDT] LLM: Apesar da queda de 2.7% nas ?ltimas 24 horas, o volume recente ? baixo e os closes de 5 horas apresentam volatilidade, indicando incerteza na dire??o do pre?o.
+2026-03-19 09:10:34,851 [INFO] Ciclo concluido.
+2026-03-19 09:14:08,132 [INFO] Crypto Bot iniciado -- OpenRouter + Binance TESTNET (sem dinheiro real)
+2026-03-19 09:14:08,133 [INFO] Simbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-19 09:14:08,133 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-19 09:14:08,133 [INFO] -------------------------------------------------------
+2026-03-19 09:14:08,134 [INFO] Ciclo: 2026-03-19 09:14:08
+2026-03-19 09:14:08,421 [INFO] Saldo USDT disponivel: $83887.63
+2026-03-19 09:14:08,421 [INFO] [BTCUSDT] Analisando...
+2026-03-19 09:14:14,461 [INFO] [BTCUSDT] Preco: $69831.0000 (-4.00% 24h) | Sinal: HOLD | Confianca: 60%
+2026-03-19 09:14:14,462 [INFO] [BTCUSDT] LLM: O pre?o de BTCUSDT apresentou uma queda de 4% nas ?ltimas 24 horas, mas o volume atual (26.40447) ? relativamente baixo em compara??o com a m?dia de 5 horas (61.53). A varia??o de pre?o nas ?ltimas horas ? m?nima, indicando um sinal amb?guo.
+2026-03-19 09:14:24,462 [INFO] [ETHUSDT] Analisando...
+2026-03-19 09:14:27,298 [INFO] [ETHUSDT] Preco: $2162.4200 (-4.16% 24h) | Sinal: HOLD | Confianca: 45%
+2026-03-19 09:14:27,298 [INFO] [ETHUSDT] LLM: O volume recente est? abaixo da m?dia de 5 horas, indicando baixa convic??o no movimento atual. A tend?ncia ? lateral com pequenas varia??es, sem for?a suficiente para definir um vi?s claro.
+2026-03-19 09:14:37,299 [INFO] [BNBUSDT] Analisando...
+2026-03-19 09:15:18,408 [INFO] [BNBUSDT] Preco: $643.0700 (-2.74% 24h) | Sinal: SELL | Confianca: 75%
+2026-03-19 09:15:18,408 [INFO] [BNBUSDT] LLM: A queda de 2,74% nas ?ltimas 24 horas indica press?o vendedora forte, mas o volume nas ?ltimas 5 horas est? acima da m?dia (34,705 vs 315,46), confirmando a tend?ncia baixa spite do movimento menor nos ?ltimos 5 horas.
+2026-03-19 09:15:19,330 [WARNING] [BNBUSDT] Quantidade 0.0 abaixo do minimo 0.001 -- ignorando
+2026-03-19 09:15:29,331 [INFO] Ciclo concluido.
+2026-03-19 09:17:54,308 [INFO] Crypto Bot iniciado -- OpenRouter + Binance TESTNET (sem dinheiro real)
+2026-03-19 09:17:54,309 [INFO] Simbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-19 09:17:54,309 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-19 09:17:54,309 [INFO] -------------------------------------------------------
+2026-03-19 09:17:54,310 [INFO] Ciclo: 2026-03-19 09:17:54
+2026-03-19 09:17:54,598 [INFO] Saldo USDT disponivel: $83887.63
+2026-03-19 09:17:54,598 [INFO] [BTCUSDT] Analisando...
+2026-03-19 09:17:59,237 [INFO] [BTCUSDT] Preco: $69608.6100 (-4.32% 24h) | Sinal: SELL | Confianca: 75%
+2026-03-19 09:17:59,237 [INFO] [BTCUSDT] LLM: Apesar de um volume relativamente alto, a tendÃªncia de alta nas Ãºltimas horas foi seguida por uma queda significativa (-4.316% em 24h) e um fechamento prÃ³ximo ao de abertura, indicando pressÃ£o vendedora. O volume atual (33.30456) Ã© significativamente menor que o volume mÃ©dio das Ãºltimas 5 horas (62.91).
+2026-03-19 09:18:00,448 [INFO] [BTCUSDT] [OK] SELL 0.00099 BTC @ ~$69608.61 -- ID: 20269173
+2026-03-19 09:18:10,449 [INFO] [ETHUSDT] Analisando...
+2026-03-19 09:18:26,982 [INFO] [ETHUSDT] Preco: $2157.6200 (-4.54% 24h) | Sinal: SELL | Confianca: 75%
+2026-03-19 09:18:26,982 [INFO] [ETHUSDT] LLM: O preÃ§o do ETH apresentou uma queda significativa de 4.54% nas Ãºltimas 24 horas, acompanhada de um volume relativamente alto.  A combinaÃ§Ã£o de queda e volume sugere pressÃ£o vendedora persistente, indicando um potencial para mais perdas.
+2026-03-19 09:18:27,921 [WARNING] [ETHUSDT] Valor $1.94 abaixo do minimo notional $5.00 -- ignorando
+2026-03-19 09:18:37,926 [INFO] [BNBUSDT] Analisando...
+2026-03-19 09:18:44,451 [INFO] [BNBUSDT] Preco: $642.1600 (-2.92% 24h) | Sinal: HOLD | Confianca: 45%
+2026-03-19 09:18:44,452 [INFO] [BNBUSDT] LLM: O volume atual estÃ¡ acima da mÃ©dia dos Ãºltimos 5h, mas a tendÃªncia de preÃ§o nos Ãºltimos fechamentos Ã© descendente. A queda de 2.92% nas Ãºltimas 24h sugere pressÃ£o vendedora sem forÃ§a suficiente para um sinal claro.
+2026-03-19 09:18:54,457 [INFO] Ciclo concluido.
+2026-03-19 10:18:54,538 [INFO] -------------------------------------------------------
+2026-03-19 10:18:54,541 [INFO] Ciclo: 2026-03-19 10:18:54
+2026-03-19 10:18:54,905 [INFO] Saldo USDT disponivel: $83956.54
+2026-03-19 10:18:54,905 [INFO] [BTCUSDT] Analisando...
+2026-03-19 10:18:59,007 [INFO] [BTCUSDT] Preco: $69283.8000 (-4.16% 24h) | Sinal: HOLD | Confianca: 50%
+2026-03-19 10:18:59,008 [INFO] [BTCUSDT] LLM: Downtrend in closes over last 5 hours with volume below 5h average, indicating ambiguous short-term direction
+2026-03-19 10:19:09,010 [INFO] [ETHUSDT] Analisando...
+2026-03-19 10:19:23,928 [INFO] [ETHUSDT] Preco: $2127.2300 (-4.70% 24h) | Sinal: SELL | Confianca: 80%
+2026-03-19 10:19:23,929 [INFO] [ETHUSDT] LLM: Price declined over the last 5 hours with a 24-hour drop of 4.7%. Volume below average but trend confirms selling pressure.
+2026-03-19 10:19:25,352 [WARNING] [ETHUSDT] Valor $1.91 abaixo do minimo notional $5.00 -- ignorando
+2026-03-19 10:19:35,353 [INFO] [BNBUSDT] Analisando...
+2026-03-19 10:19:55,342 [INFO] [BNBUSDT] Preco: $638.4100 (-2.84% 24h) | Sinal: SELL | Confianca: 81%
+2026-03-19 10:19:55,342 [INFO] [BNBUSDT] LLM: O preÃ§o caiu nas Ãºltimas 5h e o volume de negociaÃ§Ã£o 24h estÃ¡ muito acima da mÃ©dia, indicando forte pressÃ£o de venda. Essas condiÃ§Ãµes favorecem continuaÃ§Ã£o de baixa.
+2026-03-19 10:19:56,507 [WARNING] [BNBUSDT] Quantidade 0.0 abaixo do minimo 0.001 -- ignorando
+2026-03-19 10:20:06,508 [INFO] Ciclo concluido.
+2026-03-19 11:20:06,576 [INFO] -------------------------------------------------------
+2026-03-19 11:20:06,581 [INFO] Ciclo: 2026-03-19 11:20:06
+2026-03-19 11:20:06,969 [INFO] Saldo USDT disponivel: $83956.54
+2026-03-19 11:20:06,969 [INFO] [BTCUSDT] Analisando...
+2026-03-19 11:20:38,477 [INFO] [BTCUSDT] Preco: $69422.8300 (-3.48% 24h) | Sinal: HOLD | Confianca: 50%
+2026-03-19 11:20:38,478 [INFO] [BTCUSDT] LLM: PreÃ§os das Ãºltimas 5 horas exibem volatilidade sem tendÃªncia definida, com volume atual abaixo da mÃ©dia. AusÃªncia de confirmaÃ§Ã£o de volume para uma direÃ§Ã£o clara.
+2026-03-19 11:20:48,480 [INFO] [ETHUSDT] Analisando...
+2026-03-19 11:20:52,961 [INFO] [ETHUSDT] Preco: $2125.5200 (-4.40% 24h) | Sinal: HOLD | Confianca: 55%
+2026-03-19 11:20:52,962 [INFO] [ETHUSDT] LLM: The price is down 4.4% over 24h with a downtrend in the last 5 closes and volume not clearly above average, indicating weak momentum and uncertainty.
+2026-03-19 11:21:02,964 [INFO] [BNBUSDT] Analisando...
+2026-03-19 11:21:09,318 [INFO] [BNBUSDT] Preco: $639.0900 (-2.50% 24h) | Sinal: SELL | Confianca: 70%
+2026-03-19 11:21:09,318 [INFO] [BNBUSDT] LLM: Price declined over last 5 hours with higher-than-average volume indicating selling pressure.
+2026-03-19 11:21:10,400 [WARNING] [BNBUSDT] Quantidade 0.0 abaixo do minimo 0.001 -- ignorando
+2026-03-19 11:21:20,401 [INFO] Ciclo concluido.
+2026-03-19 12:24:46,020 [INFO] -------------------------------------------------------
+2026-03-19 12:24:46,038 [INFO] Ciclo: 2026-03-19 12:24:46
+2026-03-19 12:24:46,539 [INFO] Saldo USDT disponivel: $83956.54
+2026-03-19 12:24:46,541 [INFO] [BTCUSDT] Analisando...
+2026-03-19 12:24:55,201 [INFO] [BTCUSDT] Preco: $69304.4000 (-2.72% 24h) | Sinal: HOLD | Confianca: 50%
+2026-03-19 12:24:55,201 [INFO] [BTCUSDT] LLM: PreÃ§o apresentou leve queda nas Ãºltimas 5 horas enquanto o volume atual ficou abaixo da mÃ©dia de 5h, faltando confirmaÃ§Ã£o de pressÃ£o vendedora forte.
+2026-03-19 12:25:05,203 [INFO] [ETHUSDT] Analisando...
+2026-03-19 12:26:42,123 [INFO] [ETHUSDT] Preco: $2111.8500 (-3.02% 24h) | Sinal: HOLD | Confianca: 58%
+2026-03-19 12:26:42,124 [INFO] [ETHUSDT] LLM: O preÃ§o mostra queda recente, mas o volume Ã© inferior Ã  mÃ©dia de 5h, reduzindo a confianÃ§a em pressÃ£o vendedora. A falta de tendÃªncia clara e Volume nÃ£o atende critÃ©rio decisivo para BUY ou SELL.
+2026-03-19 12:26:52,125 [INFO] [BNBUSDT] Analisando...
+2026-03-19 12:27:00,471 [INFO] [BNBUSDT] Preco: $636.2100 (-1.68% 24h) | Sinal: HOLD | Confianca: 55%
+2026-03-19 12:27:00,472 [INFO] [BNBUSDT] LLM: PreÃ§o apresentou leve tendÃªncia de baixa nas Ãºltimas 5 horas e o volume atual estÃ¡ abaixo da mÃ©dia recente, indicando falta de pressÃ£o compradora clara.
+2026-03-19 12:27:10,474 [INFO] Ciclo concluido.
+2026-03-19 13:28:54,729 [INFO] -------------------------------------------------------
+2026-03-19 13:28:54,744 [INFO] Ciclo: 2026-03-19 13:28:54
+2026-03-19 13:28:55,121 [INFO] Saldo USDT disponivel: $83956.54
+2026-03-19 13:28:55,132 [INFO] [BTCUSDT] Analisando...
+2026-03-19 13:29:37,825 [INFO] [BTCUSDT] Preco: $69522.3600 (-2.46% 24h) | Sinal: HOLD | Confianca: 50%
+2026-03-19 13:29:37,826 [INFO] [BTCUSDT] LLM: Minor price increase in last hour but below-average volume; 24h downtrend persists without clear directional bias in 5-hour closes.
+2026-03-19 13:29:47,828 [INFO] [ETHUSDT] Analisando...
+2026-03-19 13:36:16,309 [WARNING] Tentativa 1 falhou para ETHUSDT: 'NoneType' object has no attribute 'strip' -- aguardando 15s
+2026-03-19 13:37:31,802 [INFO] [ETHUSDT] Preco: $2114.7000 (-2.82% 24h) | Sinal: HOLD | Confianca: 60%
+2026-03-19 13:37:31,802 [INFO] [ETHUSDT] LLM: Preco em queda nas ultimas 5 horas, mas volume na ultima hora abaixo da media, sem confirmacao forte de pressao vendedora.
+2026-03-19 13:37:41,805 [INFO] [BNBUSDT] Analisando...
+2026-03-19 13:37:45,809 [INFO] [BNBUSDT] Preco: $635.5200 (-1.98% 24h) | Sinal: SELL | Confianca: 88%
+2026-03-19 13:37:45,810 [INFO] [BNBUSDT] LLM: Price is trending downwards over the last five periods with a ~2% drop in the last 24h, and today's volume far exceeds the 5-hour average, indicating strong selling pressure.
+2026-03-19 13:37:46,727 [WARNING] [BNBUSDT] Quantidade 0.0 abaixo do minimo 0.001 -- ignorando
+2026-03-19 13:37:56,729 [INFO] Ciclo concluido.
+2026-03-19 14:38:08,840 [INFO] -------------------------------------------------------
+2026-03-19 14:38:08,845 [INFO] Ciclo: 2026-03-19 14:38:08
+2026-03-19 14:38:09,229 [INFO] Saldo USDT disponivel: $83956.54
+2026-03-19 14:38:09,230 [INFO] [BTCUSDT] Analisando...
+2026-03-19 14:38:15,076 [INFO] [BTCUSDT] Preco: $69534.6700 (-2.85% 24h) | Sinal: HOLD | Confianca: 60%
+2026-03-19 14:38:15,077 [INFO] [BTCUSDT] LLM: 5-hour closes show slight upward trend but 24-hour change negative; volume not consistently above average
+2026-03-19 14:38:25,077 [INFO] [ETHUSDT] Analisando...
+2026-03-19 14:38:28,155 [INFO] [ETHUSDT] Preco: $2117.3600 (-3.92% 24h) | Sinal: SELL | Confianca: 75%
+2026-03-19 14:38:28,156 [INFO] [ETHUSDT] LLM: O preÃ§o atual estÃ¡ abaixo do mÃ¡ximo de 24 horas e houve uma queda significativa de 3.92% nas Ãºltimas 24 horas. O volume atual (245.0209) estÃ¡ acima da mÃ©dia das Ãºltimas 5 horas (658.96), indicando pressÃ£o vendedora.
+2026-03-19 14:38:29,053 [WARNING] [ETHUSDT] Valor $1.91 abaixo do minimo notional $5.00 -- ignorando
+2026-03-19 14:38:39,054 [INFO] [BNBUSDT] Analisando...
+2026-03-19 14:38:42,018 [INFO] [BNBUSDT] Preco: $636.7800 (-2.17% 24h) | Sinal: HOLD | Confianca: 55%
+2026-03-19 14:38:42,019 [INFO] [BNBUSDT] LLM: O preÃ§o mostra leve queda nas Ãºltimas 5 horas, mas o volume estÃ¡ abaixo da mÃ©dia, indicando falta de forÃ§a na tendÃªncia atual.
+2026-03-19 14:38:52,020 [INFO] Ciclo concluido.
+2026-03-20 09:42:49,837 [INFO] Crypto Bot iniciado -- OpenRouter + Binance TESTNET (sem dinheiro real)
+2026-03-20 09:42:49,838 [INFO] Simbolos: BTCUSDT, ETHUSDT, BNBUSDT
+2026-03-20 09:42:49,839 [INFO] Intervalo: 60 min | USDT por trade: $50.0
+2026-03-20 09:42:49,839 [INFO] Stop-loss: 3.0% | Take-profit: 5.0% | Limite diario: $20.0
+2026-03-20 09:42:49,840 [INFO] -------------------------------------------------------
+2026-03-20 09:42:49,840 [INFO] Ciclo: 2026-03-20 09:42:49
+2026-03-20 09:42:50,141 [INFO] Saldo USDT: $83956.54 | Perda hoje: $0.00/$20.00
+2026-03-20 09:42:50,719 [INFO] [BTCUSDT] Analisando...
+2026-03-20 09:42:55,433 [INFO] [BTCUSDT] Preco: $70292.2000 (+0.90% 24h) | Sinal: HOLD | Confianca: 40%
+2026-03-20 09:42:55,433 [INFO] [BTCUSDT] LLM: Recent 5-hour closes show decline but 24-hour change positive; volume below 5-hour average suggests uncertainty
+2026-03-20 09:43:05,981 [INFO] [ETHUSDT] Analisando...
+2026-03-20 09:43:12,365 [INFO] [ETHUSDT] Preco: $2136.0700 (-0.92% 24h) | Sinal: HOLD | Confianca: 50%
+2026-03-20 09:43:12,366 [INFO] [ETHUSDT] LLM: The price shows a slight downward trend in the last 5 closes, but the volume is below average, indicating mixed signals.
+2026-03-20 09:43:22,914 [INFO] [BNBUSDT] Analisando...
+2026-03-20 09:43:25,700 [INFO] [BNBUSDT] Preco: $641.0600 (-0.12% 24h) | Sinal: HOLD | Confianca: 60%
+2026-03-20 09:43:25,701 [INFO] [BNBUSDT] LLM: Apesar da queda de preÃ§o nas Ãºltimas horas, o volume de 24h Ã© relativamente alto, mas o volume mÃ©dio das Ãºltimas 5 horas Ã© significativamente menor. A variaÃ§Ã£o de preÃ§o de 24h Ã© negativa, mas nÃ£o Ã© forte o suficiente para justificar uma recomendaÃ§Ã£o de compra ou venda.
+2026-03-20 09:43:35,706 [INFO] Ciclo concluido.
