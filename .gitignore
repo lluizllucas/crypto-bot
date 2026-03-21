@@ -1,5 +1,3 @@
-# Arquivos sensiveis 
-config.py 
 # Logs 
 *.log 
 bot.log* 

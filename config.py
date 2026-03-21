@@ -1,11 +1,13 @@
+import os
+
 # config.py
 
-OPENROUTER_API_KEY = "sua_chave_aqui"
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY",  "")
 
 # 2. Binance TESTNET (sem dinheiro real)
 
-BINANCE_API_KEY    = "sua_chave_aqui"
-BINANCE_SECRET_KEY = "sua_chave_aqui"
+BINANCE_API_KEY    = os.getenv("BINANCE_API_KEY",     "")
+BINANCE_SECRET_KEY = os.getenv("BINANCE_SECRET_KEY",  "")
 
 # Pares a monitorar
 # BNB e ETH removidos apos backtest de 365 dias
@@ -31,7 +33,7 @@ TAKE_PROFIT_PCT = 5.0
 
 # Discord webhook para notificacoes
 # Crie em: canal -> Integrações -> Webhooks -> Novo Webhook
-DISCORD_WEBHOOK_URL = "sua_url_aqui"
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "")
 
 # Limite de perda total no dia em USDT
 MAX_DAILY_LOSS_USDT = 20.0
