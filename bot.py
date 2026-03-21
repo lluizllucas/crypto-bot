@@ -28,6 +28,7 @@ from config import (
     TAKE_PROFIT_PCT,
     MAX_DAILY_LOSS_USDT,
     MONITOR_INTERVAL_MINUTES,
+    DISCORD_WEBHOOK_URL,
 )
 
 # ── Logging ───────────────────────────────────────────────────────────────────
@@ -107,6 +108,29 @@ def sanitize(text: str) -> str:
     for char, rep in replacements.items():
         text = text.replace(char, rep)
     return text
+
+
+def discord_notify(title: str, message: str, color: int = 0x5865F2):
+    """
+    Envia uma notificacao para o canal do Discord via webhook.
+    color: 0x57F287 (verde), 0xED4245 (vermelho), 0xFEE75C (amarelo), 0x5865F2 (azul)
+    """
+    if not DISCORD_WEBHOOK_URL:
+        return
+    try:
+        import requests
+        payload = {
+            "embeds": [{
+                "title": title,
+                "description": message,
+                "color": color,
+                "footer": {"text": "Trading Bot"},
+                "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+            }]
+        }
+        requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=5)
+    except Exception as e:
+        log.warning(f"Erro ao enviar notificacao Discord: {e}")
 
 
 def get_balance(asset: str) -> float:
@@ -240,6 +264,18 @@ def close_position(symbol: str, current_price: float, reason: str):
             f"PnL total: ${session_stats['pnl_total']:+.4f}"
         )
         del open_positions[symbol]
+        notify_color = 0x57F287 if pnl >= 0 else 0xED4245
+        discord_notify(
+            title=f"{reason} -- {symbol}",
+            message=(
+                f"**Entrada:** ${entry:.4f}\n"
+                f"**Saida:** ${current_price:.4f}\n"
+                f"**PnL:** ${pnl:+.4f}\n"
+                f"**Sessao:** {session_stats['trades_win']}W/{session_stats['trades_loss']}L "
+                f"| PnL total: ${session_stats['pnl_total']:+.4f}"
+            ),
+            color=notify_color
+        )
     except BinanceAPIException as e:
         log.error(f"[{symbol}] Erro ao fechar posicao: {e}")
 
@@ -362,6 +398,19 @@ def execute_trade(symbol: str, signal: str, confidence: float, last_price: float
                 f"ID: {order['orderId']}"
             )
             register_position(symbol, last_price, qty)
+            sl_price = last_price * (1 - STOP_LOSS_PCT / 100)
+            tp_price = last_price * (1 + TAKE_PROFIT_PCT / 100)
+            discord_notify(
+                title=f"BUY -- {symbol}",
+                message=(
+                    f"**Preco:** ${last_price:.4f}\n"
+                    f"**Quantidade:** {qty}\n"
+                    f"**Valor:** ~${qty * last_price:.2f}\n"
+                    f"**Stop-loss:** ${sl_price:.4f} (-{STOP_LOSS_PCT}%)\n"
+                    f"**Take-profit:** ${tp_price:.4f} (+{TAKE_PROFIT_PCT}%)"
+                ),
+                color=0x57F287
+            )
             return True
 
         elif signal == "SELL":
@@ -380,6 +429,15 @@ def execute_trade(symbol: str, signal: str, confidence: float, last_price: float
             )
             if symbol in open_positions:
                 del open_positions[symbol]
+            discord_notify(
+                title=f"SELL -- {symbol}",
+                message=(
+                    f"**Preco:** ${last_price:.4f}\n"
+                    f"**Quantidade:** {qty} {base_asset}\n"
+                    f"**Motivo:** sinal do LLM"
+                ),
+                color=0xFEE75C
+            )
             return True
 
     except BinanceAPIException as e:
