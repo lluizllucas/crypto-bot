@@ -11,6 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia o resto do codigo
 COPY bot.py .
 COPY config.py .
+COPY resumo.py .
 
 # Comando que roda quando o container iniciar
 CMD ["python3", "bot.py"]
