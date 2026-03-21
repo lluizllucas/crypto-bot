@@ -557,7 +557,7 @@ def run_cycle():
 
 if __name__ == "__main__":
     log.info("=" * 55)
-    log.info("Crypto Bot iniciado -- OpenRouter + Binance TESTNET")
+    log.info("Crypto Bot iniciado -- OpenRouter + Binance TESTNET by lluizllucas")
     log.info(f"  Simbolos:        {', '.join(SYMBOLS)}")
     log.info(f"  Analise:         a cada {INTERVAL_MINUTES} min")
     log.info(f"  Monitor SL/TP:   a cada {MONITOR_INTERVAL_MINUTES} min")
