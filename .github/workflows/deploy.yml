@@ -13,7 +13,7 @@ jobs:
       - name: Checkout codigo
         uses: actions/checkout@v4
 
-      - name: Deploy no servidor
+      - name: Build e deploy no servidor
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -21,7 +21,6 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           script: |
             cd ~/trading-bot
-            source venv/bin/activate
             git pull origin main
-            pip install -r requirements.txt
+            docker build -t crypto-bot .
             sudo systemctl restart trading-bot
