@@ -9,7 +9,7 @@ import sys
 import time
 import logging
 import logging.handlers
-from datetime import datetime
+from datetime import datetime, timezone
 
 import schedule
 from openai import OpenAI
@@ -92,7 +92,7 @@ session_stats = {
     "trades_win":   0,
     "trades_loss":  0,
     "pnl_total":    0.0,
-    "started_at":   datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    "started_at":   datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
 }
 
 
@@ -125,7 +125,7 @@ def discord_notify(title: str, message: str, color: int = 0x5865F2):
                 "description": message,
                 "color": color,
                 "footer": {"text": "Trading Bot"},
-                "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+                "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
             }]
         }
         requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=5)
@@ -180,7 +180,7 @@ def adjust_qty(qty: float, step: float, decimals: int) -> float:
 def check_daily_loss_limit() -> bool:
     """Retorna True se o limite de perda diaria foi atingido."""
     global daily_loss_usdt, daily_loss_date
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
     if daily_loss_date != today:
         if daily_loss_date:
             log.info(f"Novo dia -- perda acumulada resetada (era ${daily_loss_usdt:.2f})")
@@ -508,7 +508,7 @@ def run_cycle():
     global daily_loss_usdt
 
     log.info("-" * 55)
-    log.info(f"Ciclo: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    log.info(f"Ciclo: {datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")}")
     log.info(
         f"Saldo USDT: ${get_balance('USDT'):.2f} | "
         f"Perda hoje: ${daily_loss_usdt:.2f}/${MAX_DAILY_LOSS_USDT:.2f} | "
