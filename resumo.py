@@ -14,7 +14,7 @@ DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "")
 
 def parse_hoje() -> dict:
     """Parseia o log atual e extrai metricas das ultimas 24 horas."""
-    filepath = "/app/bot.log"
+    filepath = "/app/logs/bot.log"
 
     if not os.path.exists(filepath):
         return {}
