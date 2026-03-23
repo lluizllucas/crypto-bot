@@ -13,18 +13,10 @@ DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "")
 
 
 def parse_hoje() -> dict:
-    """Parseia o log de hoje e extrai metricas."""
-    hoje = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
-    ontem = (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    """Parseia o log atual e extrai metricas das ultimas 24 horas."""
+    filepath = "bot.log"
 
-    # Tenta log de hoje, depois de ontem
-    filepath = None
-    for f in [f"bot.log.{ontem}", "bot.log"]:
-        if os.path.exists(f):
-            filepath = f
-            break
-
-    if not filepath:
+    if not os.path.exists(filepath):
         return {}
 
     trades  = []
@@ -32,14 +24,22 @@ def parse_hoje() -> dict:
     erros   = 0
     saldo   = 0.0
 
-    pattern = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d+ \[(\w+)\] (.+)")
+    # Pega apenas eventos das ultimas 24 horas
+    limite = datetime.now() - timedelta(hours=24)
+
+    pattern = re.compile(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+ \[(\w+)\] (.+)")
 
     with open(filepath, encoding="utf-8") as f:
         for line in f:
             m = pattern.match(line.strip())
             if not m:
                 continue
-            level, msg = m.groups()
+            ts_str, level, msg = m.groups()
+            ts = datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S")
+
+            # Ignora eventos mais antigos que 24 horas
+            if ts < limite:
+                continue
 
             if "Posicao fechada" in msg:
                 pnl = re.search(r"PnL: \$([+-][\d.]+)", msg)
