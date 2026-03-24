@@ -47,7 +47,7 @@ if hasattr(_console.stream, "reconfigure"):
 # Arquivo principal -- rotacao diaria, retencao infinita (para analise historica)
 # Gera: bot.log (hoje), bot.log.2026-03-20 (ontem), etc.
 _file_main = logging.handlers.TimedRotatingFileHandler(
-    "bot.log", when="midnight", interval=1, backupCount=0, encoding="utf-8"
+    "/app/logs/bot.log", when="midnight", interval=1, backupCount=0, encoding="utf-8"
 )
 _file_main.setFormatter(_fmt)
 _file_main.setLevel(logging.INFO)
@@ -55,7 +55,7 @@ _file_main.setLevel(logging.INFO)
 # Arquivo de erros -- apenas WARNING+ para diagnostico rapido
 # Gera: bot.error.log (hoje), bot.error.log.2026-03-20 (ontem), etc.
 _file_err = logging.handlers.TimedRotatingFileHandler(
-    "bot.error.log", when="midnight", interval=1, backupCount=0, encoding="utf-8"
+    "/app/logs/bot.error.log", when="midnight", interval=1, backupCount=0, encoding="utf-8"
 )
 _file_err.setFormatter(_fmt)
 _file_err.setLevel(logging.WARNING)
