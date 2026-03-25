@@ -16,7 +16,13 @@ def parse_hoje() -> dict:
     """Parseia o log atual e extrai metricas das ultimas 24 horas."""
     filepath = "/app/logs/bot.log"
 
-    if not os.path.exists(filepath):
+    ontem = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    
+    # Tenta o arquivo de ontem primeiro, depois o atual
+    for filepath in [f"/app/logs/bot.log.{ontem}", "/app/logs/bot.log"]:
+        if os.path.exists(filepath):
+            break
+    else:
         return {}
 
     trades  = []
