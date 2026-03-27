@@ -13,8 +13,12 @@ BINANCE_SECRET_KEY = os.getenv("BINANCE_SECRET_KEY",  "")
 # BNB e ETH removidos apos backtest de 365 dias
 SYMBOLS = ["BTCUSDT"]
 
-# Valor em USDT por operacao de compra
+# Valor em USDT por operacao de compra (fixo; sem % do capital)
 TRADE_USDT = 50.0
+
+# Multi-posicao por par: no maximo N lotes abertos; novas entradas exigem distancia minima
+MAX_POSITIONS_PER_SYMBOL = 3
+MIN_ENTRY_DISTANCE_PCT = 0.5
 
 # Confianca minima do LLM para executar uma ordem (0.0 a 1.0)
 MIN_CONFIDENCE = 0.65
