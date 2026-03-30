@@ -29,6 +29,8 @@ from config import (
     MAX_DAILY_LOSS_USDT,
     MONITOR_INTERVAL_MINUTES,
     DISCORD_WEBHOOK_URL,
+    MAX_POSITIONS_PER_SYMBOL,
+    MIN_ENTRY_DISTANCE_PCT,
 )
 
 # ── Logging ───────────────────────────────────────────────────────────────────
@@ -79,7 +81,8 @@ client = Client(
     testnet=True,
 )
 
-# Rastreamento de posicoes abertas: { "BTCUSDT": {"entry_price": 69000.0, "qty": 0.0007} }
+# Rastreamento de posicoes abertas (multi-lote por simbolo):
+# { "BTCUSDT": [ {"entry_price", "qty", "sl", "tp", "ts"}, ... ] }
 open_positions: dict = {}
 
 # Perda acumulada no dia
@@ -196,39 +199,36 @@ def check_daily_loss_limit() -> bool:
 
 
 def register_position(symbol: str, entry_price: float, qty: float):
-    """Registra uma posicao aberta para monitoramento de SL/TP."""
-    open_positions[symbol] = {"entry_price": entry_price, "qty": qty}
+    """Acrescenta um lote ao simbolo para monitoramento de SL/TP."""
+    if symbol not in open_positions:
+        open_positions[symbol] = []
     sl = entry_price * (1 - STOP_LOSS_PCT / 100)
     tp = entry_price * (1 + TAKE_PROFIT_PCT / 100)
+    open_positions[symbol].append({
+        "entry_price": entry_price,
+        "qty": qty,
+        "sl": sl,
+        "tp": tp,
+        "ts": datetime.now(timezone.utc),
+    })
+    n = len(open_positions[symbol])
     log.info(
-        f"[{symbol}] Posicao registrada | "
+        f"[{symbol}] Posicao registrada ({n}/{MAX_POSITIONS_PER_SYMBOL}) | "
         f"entrada: ${entry_price:.4f} | "
         f"SL: ${sl:.4f} (-{STOP_LOSS_PCT}%) | "
         f"TP: ${tp:.4f} (+{TAKE_PROFIT_PCT}%)"
     )
 
 
-def check_stop_take(symbol: str, current_price: float) -> str | None:
-    """Retorna 'STOP', 'TAKE' ou None."""
-    if symbol not in open_positions:
-        return None
-    entry = open_positions[symbol]["entry_price"]
-    change_pct = (current_price - entry) / entry * 100
-    if change_pct <= -STOP_LOSS_PCT:
-        return "STOP"
-    if change_pct >= TAKE_PROFIT_PCT:
-        return "TAKE"
-    return None
-
-
-def close_position(symbol: str, current_price: float, reason: str):
-    """Vende toda a posicao aberta, registra PnL e atualiza estatisticas."""
+def close_position_at_index(symbol: str, idx: int, current_price: float, reason: str):
+    """Fecha um lote pelo indice na lista, vende apenas essa quantidade."""
     global daily_loss_usdt
 
-    if symbol not in open_positions:
+    positions = open_positions.get(symbol)
+    if not positions or idx < 0 or idx >= len(positions):
         return
 
-    pos   = open_positions[symbol]
+    pos   = positions[idx]
     entry = pos["entry_price"]
     qty   = pos["qty"]
     pnl   = (current_price - entry) * qty
@@ -237,14 +237,15 @@ def close_position(symbol: str, current_price: float, reason: str):
     sell_qty = adjust_qty(qty * 0.999, step, decimals)
 
     if sell_qty < min_qty or sell_qty * current_price < min_notional:
-        log.warning(f"[{symbol}] Quantidade insuficiente para fechar posicao ({sell_qty})")
-        del open_positions[symbol]
+        log.warning(f"[{symbol}] Quantidade insuficiente para fechar lote ({sell_qty})")
+        positions.pop(idx)
+        if not positions:
+            del open_positions[symbol]
         return
 
     try:
         order = client.order_market_sell(symbol=symbol, quantity=sell_qty)
 
-        # Atualiza estatisticas
         session_stats["trades_total"] += 1
         session_stats["pnl_total"]    += pnl
         if pnl >= 0:
@@ -255,7 +256,7 @@ def close_position(symbol: str, current_price: float, reason: str):
 
         level = logging.INFO if pnl >= 0 else logging.WARNING
         log.log(level,
-            f"[{symbol}] [{reason}] Posicao fechada | "
+            f"[{symbol}] [{reason}] Lote fechado | "
             f"entrada: ${entry:.4f} -> saida: ${current_price:.4f} | "
             f"PnL: ${pnl:+.4f} | "
             f"ID: {order['orderId']} | "
@@ -263,7 +264,9 @@ def close_position(symbol: str, current_price: float, reason: str):
             f"{session_stats['trades_loss']}L "
             f"PnL total: ${session_stats['pnl_total']:+.4f}"
         )
-        del open_positions[symbol]
+        positions.pop(idx)
+        if not positions:
+            del open_positions[symbol]
         notify_color = 0x57F287 if pnl >= 0 else 0xED4245
         discord_notify(
             title=f"{reason} -- {symbol}",
@@ -379,9 +382,21 @@ def execute_trade(symbol: str, signal: str, confidence: float, last_price: float
 
     try:
         if signal == "BUY":
-            if symbol in open_positions:
-                log.info(f"[{symbol}] Ja ha posicao aberta -- ignorando BUY")
+            posicoes = open_positions.get(symbol, [])
+            if len(posicoes) >= MAX_POSITIONS_PER_SYMBOL:
+                log.info(
+                    f"[{symbol}] Limite de posicoes ({MAX_POSITIONS_PER_SYMBOL}) -- ignorando BUY"
+                )
                 return False
+            if posicoes:
+                ultima_entrada = posicoes[-1]["entry_price"]
+                distancia = abs(last_price - ultima_entrada) / ultima_entrada * 100
+                if distancia < MIN_ENTRY_DISTANCE_PCT:
+                    log.info(
+                        f"[{symbol}] Nova entrada muito perto da ultima "
+                        f"({distancia:.2f}% < {MIN_ENTRY_DISTANCE_PCT}%) -- ignorando BUY"
+                    )
+                    return False
             if usdt_balance < 10:
                 log.warning(f"[{symbol}] Saldo USDT insuficiente ({usdt_balance:.2f})")
                 return False
@@ -463,13 +478,19 @@ def log_daily_summary():
     log.info(f"  Win rate:           {wr:.1f}% ({wins}W/{session_stats['trades_loss']}L)")
     log.info(f"  PnL da sessao:      ${session_stats['pnl_total']:+.4f}")
     log.info(f"  Perda acumulada:    ${daily_loss_usdt:.2f} / ${MAX_DAILY_LOSS_USDT:.2f}")
-    log.info(f"  Posicoes abertas:   {len(open_positions)}")
+    total_lotes = sum(len(v) for v in open_positions.values())
+    log.info(f"  Posicoes abertas:   {total_lotes} lote(s) em {len(open_positions)} par(es)")
     if open_positions:
-        for sym, pos in open_positions.items():
+        for sym, plist in open_positions.items():
             price = get_current_price(sym)
-            if price:
+            if not price:
+                continue
+            for pos in plist:
                 change = (price - pos["entry_price"]) / pos["entry_price"] * 100
-                log.info(f"    {sym}: entrada ${pos['entry_price']:.4f} | atual ${price:.4f} | {change:+.2f}%")
+                log.info(
+                    f"    {sym}: entrada ${pos['entry_price']:.4f} | "
+                    f"atual ${price:.4f} | {change:+.2f}%"
+                )
     log.info("=" * 55)
 
 
@@ -478,7 +499,7 @@ def log_daily_summary():
 def monitor_positions():
     """
     Ciclo rapido (a cada MONITOR_INTERVAL_MINUTES).
-    Verifica SL/TP em todas as posicoes abertas sem chamar o LLM.
+    Verifica SL/TP em cada lote aberto sem chamar o LLM.
     """
     if not open_positions:
         return
@@ -488,18 +509,29 @@ def monitor_positions():
         if price is None:
             continue
 
-        entry  = open_positions[symbol]["entry_price"]
-        change = (price - entry) / entry * 100
+        positions = open_positions[symbol]
+        for idx in range(len(positions) - 1, -1, -1):
+            pos = positions[idx]
+            entry = pos["entry_price"]
+            change = (price - entry) / entry * 100
 
-        trigger = check_stop_take(symbol, price)
-        if trigger == "STOP":
-            log.warning(f"[MONITOR] [{symbol}] STOP-LOSS atingido @ ${price:.4f} ({change:+.2f}%)")
-            close_position(symbol, price, "STOP-LOSS")
-        elif trigger == "TAKE":
-            log.info(f"[MONITOR] [{symbol}] TAKE-PROFIT atingido @ ${price:.4f} ({change:+.2f}%)")
-            close_position(symbol, price, "TAKE-PROFIT")
-        else:
-            log.info(f"[MONITOR] [{symbol}] OK | entrada: ${entry:.4f} | atual: ${price:.4f} | {change:+.2f}%")
+            if price <= pos["sl"]:
+                log.warning(
+                    f"[MONITOR] [{symbol}] STOP-LOSS @ ${price:.4f} "
+                    f"(entrada ${entry:.4f}, {change:+.2f}%)"
+                )
+                close_position_at_index(symbol, idx, price, "STOP-LOSS")
+            elif price >= pos["tp"]:
+                log.info(
+                    f"[MONITOR] [{symbol}] TAKE-PROFIT @ ${price:.4f} "
+                    f"(entrada ${entry:.4f}, {change:+.2f}%)"
+                )
+                close_position_at_index(symbol, idx, price, "TAKE-PROFIT")
+            else:
+                log.info(
+                    f"[MONITOR] [{symbol}] OK | entrada: ${entry:.4f} | "
+                    f"atual: ${price:.4f} | {change:+.2f}%"
+                )
 
 
 # ── Ciclo de analise (ciclo lento) ────────────────────────────────────────────
@@ -525,14 +557,15 @@ def run_cycle():
 
         current_price = data["last_price"]
 
-        # Mostra variacao da posicao aberta, se houver
-        if symbol in open_positions:
-            entry  = open_positions[symbol]["entry_price"]
-            change = (current_price - entry) / entry * 100
-            log.info(
-                f"[{symbol}] Posicao aberta | "
-                f"entrada: ${entry:.4f} | atual: ${current_price:.4f} | {change:+.2f}%"
-            )
+        plist = open_positions.get(symbol, [])
+        if plist:
+            for pos in plist:
+                entry  = pos["entry_price"]
+                change = (current_price - entry) / entry * 100
+                log.info(
+                    f"[{symbol}] Posicao aberta | "
+                    f"entrada: ${entry:.4f} | atual: ${current_price:.4f} | {change:+.2f}%"
+                )
 
         # Analise LLM
         log.info(f"[{symbol}] Analisando...")
@@ -562,6 +595,8 @@ if __name__ == "__main__":
     log.info(f"  Analise:         a cada {INTERVAL_MINUTES} min")
     log.info(f"  Monitor SL/TP:   a cada {MONITOR_INTERVAL_MINUTES} min")
     log.info(f"  USDT por trade:  ${TRADE_USDT}")
+    log.info(f"  Max lotes/par:   {MAX_POSITIONS_PER_SYMBOL}")
+    log.info(f"  Dist. min. entrada: {MIN_ENTRY_DISTANCE_PCT}%")
     log.info(f"  Stop-loss:       {STOP_LOSS_PCT}%")
     log.info(f"  Take-profit:     {TAKE_PROFIT_PCT}%")
     log.info(f"  Limite diario:   ${MAX_DAILY_LOSS_USDT}")
