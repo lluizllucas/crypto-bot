@@ -1,0 +1,14 @@
+# Logs 
+*.log 
+bot.log* 
+bot.error.log* 
+
+# Python 
+__pycache__/ 
+*.pyc 
+
+# Ambiente virtual
+venv/
+
+# Variáveis de ambiente
+.env
