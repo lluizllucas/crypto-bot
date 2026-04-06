@@ -13,8 +13,12 @@ MIN_CONFIDENCE = 0.65
 ##################### BINANCE #####################
 ####################################################
 
-# Binance TESTNET (sem dinheiro real)
-BINANCE_API_KEY = os.getenv("BINANCE_API_KEY",    "")
+# Testnet -- execucao de ordens simuladas (sem dinheiro real)
+BINANCE_TESTNET_API_KEY    = os.getenv("BINANCE_TESTNET_API_KEY",    "")
+BINANCE_TESTNET_SECRET_KEY = os.getenv("BINANCE_TESTNET_SECRET_KEY", "")
+
+# Mainnet -- apenas para quando quiser operar com dinheiro real
+BINANCE_API_KEY    = os.getenv("BINANCE_API_KEY",    "")
 BINANCE_SECRET_KEY = os.getenv("BINANCE_SECRET_KEY", "")
 
 # Pares a monitorar
