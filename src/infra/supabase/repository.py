@@ -87,6 +87,27 @@ def delete_all_positions(symbol: str):
 
 # ── Historico de trades ───────────────────────────────────────────────────────
 
+def get_trades_since(since_iso: str) -> list[dict]:
+    """
+    Retorna todos os trades fechados (STOP-LOSS, TAKE-PROFIT, SELL) a partir de since_iso.
+    since_iso: string ISO 8601, ex: '2024-01-01T00:00:00+00:00'
+    """
+    try:
+        rows = (
+            _client.table("trades")
+            .select("symbol, action, entry_price, exit_price, qty, pnl, reason, created_at")
+            .in_("action", ["STOP-LOSS", "TAKE-PROFIT", "SELL"])
+            .gte("created_at", since_iso)
+            .order("created_at")
+            .execute()
+            .data
+        )
+        return rows
+    except Exception as e:
+        log.error(f"Erro ao buscar trades desde {since_iso}: {e}")
+        return []
+
+
 def save_trade(
     symbol: str,
     action: str,
