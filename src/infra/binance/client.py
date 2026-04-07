@@ -34,7 +34,7 @@ trade_client = Client(
 def get_balance(asset: str) -> float:
     """Retorna o saldo disponivel de um asset na testnet."""
     try:
-        balance = trade_client.get_asset_balance(asset=asset)
+        balance = market_client.get_asset_balance(asset=asset)
         return float(balance["free"]) if balance else 0.0
     except Exception as e:
         log.error(f"Erro ao buscar saldo de {asset}: {e}")
