@@ -3,8 +3,5 @@ python-binance>=1.0.19
 schedule>=1.2.0
 pandas>=2.0.0
 requests>=2.31.0
-<<<<<<< HEAD
-=======
 supabase>=2.0.0
 python-dotenv>=1.0.0
->>>>>>> feat/new-market-design

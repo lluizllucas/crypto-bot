@@ -2,13 +2,6 @@
 *.log 
 bot.log* 
 bot.error.log* 
-<<<<<<< HEAD
-# Python 
-__pycache__/ 
-*.pyc 
-# Ambiente virtual 
-venv/ 
-=======
 
 # Python 
 __pycache__/ 
@@ -19,4 +12,3 @@ venv/
 
 # Variáveis de ambiente
 .env
->>>>>>> feat/new-market-design
