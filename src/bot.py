@@ -30,7 +30,7 @@ from src.application.risk_manager import (
     session_stats,
 )
 from src.application.llm_analyst import build_context
-from src.infra.supabase.repository import get_trades_since
+from src.infra.supabase.repository import get_trades_since, save_llm_log
 
 log = setup_logging()
 
@@ -200,6 +200,15 @@ def run_cycle():
         context = build_context(data, open_positions)
         signal  = analyze(data, open_positions)
 
+        llm_response = {
+            "action":        signal.action,
+            "confidence":    signal.confidence,
+            "sl_percentage": signal.sl_percentage,
+            "tp_percentage": signal.tp_percentage,
+            "reason":        signal.reason,
+        }
+        llm_log_id = save_llm_log(symbol, context, llm_response)
+
         log.info(
             f"[{symbol}] Preco: ${price:.4f} | "
             f"Acao: {signal.action} | "
@@ -209,7 +218,7 @@ def run_cycle():
         log.info(f"[{symbol}] LLM: {signal.reason}")
 
         if not daily_limit_hit:
-            execute_trade(symbol, signal, price, llm_context=context)
+            execute_trade(symbol, signal, price, llm_log_id=llm_log_id)
 
         time.sleep(10)
 

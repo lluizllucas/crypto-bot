@@ -33,6 +33,7 @@ from src.infra.supabase.repository import (
     save_position,
     delete_position,
     delete_all_positions,
+    save_llm_log,
     save_trade,
 )
 
@@ -132,8 +133,6 @@ def close_position_at_index(
     idx: int,
     current_price: float,
     reason: str,
-    llm_context: dict | None = None,
-    llm_response: dict | None = None,
 ):
     """Fecha um lote, remove do Supabase e persiste o trade no historico."""
     global daily_loss_usdt
@@ -202,8 +201,6 @@ def close_position_at_index(
             tp=pos.tp,
             pnl=round(pnl, 4),
             reason=reason,
-            llm_context=llm_context or {},
-            llm_response=llm_response or {},
         )
 
         positions.pop(idx)
@@ -233,6 +230,7 @@ def execute_trade(
     signal: TradeSignal,
     last_price: float,
     llm_context: dict | None = None,
+    llm_log_id: str | None = None,
 ) -> bool:
     """Executa uma ordem de mercado usando os SL/TP dinamicos retornados pela LLM."""
     if signal.confidence < MIN_CONFIDENCE:
@@ -248,14 +246,6 @@ def execute_trade(
     usdt_balance = get_balance("USDT")
     base_balance = get_balance(base_asset)
     min_qty, step, decimals, min_notional = get_symbol_filters(symbol)
-
-    llm_response = {
-        "action":         signal.action,
-        "confidence":     signal.confidence,
-        "sl_percentage":  signal.sl_percentage,
-        "tp_percentage":  signal.tp_percentage,
-        "reason":         signal.reason,
-    }
 
     try:
         if signal.action == "BUY":
@@ -318,8 +308,7 @@ def execute_trade(
                 tp=tp_price,
                 pnl=0.0,
                 reason=signal.reason,
-                llm_context=llm_context or {},
-                llm_response=llm_response,
+                llm_log_id=llm_log_id,
             )
 
             discord_notify(
@@ -372,8 +361,7 @@ def execute_trade(
                 tp=0.0,
                 pnl=0.0,
                 reason=signal.reason,
-                llm_context=llm_context or {},
-                llm_response=llm_response,
+                llm_log_id=llm_log_id,
             )
 
             discord_notify(

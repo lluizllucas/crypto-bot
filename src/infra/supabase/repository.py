@@ -108,6 +108,25 @@ def get_trades_since(since_iso: str) -> list[dict]:
         return []
 
 
+# ── LLM Logs ─────────────────────────────────────────────────────────────────
+
+def save_llm_log(symbol: str, context: dict, response: dict) -> str | None:
+    """
+    Persiste o contexto e a resposta da LLM para cada ciclo de analise.
+    Retorna o id gerado para ser referenciado no trade.
+    """
+    try:
+        row = _client.table("llm_logs").insert({
+            "symbol":   symbol,
+            "context":  context,
+            "response": response,
+        }).execute().data
+        return row[0]["id"] if row else None
+    except Exception as e:
+        log.error(f"Erro ao salvar llm_log ({symbol}): {e}")
+        return None
+
+
 def save_trade(
     symbol: str,
     action: str,
@@ -119,12 +138,11 @@ def save_trade(
     tp: float,
     pnl: float,
     reason: str,
-    llm_context: dict,
-    llm_response: dict,
+    llm_log_id: str | None = None,
 ):
-    """Persiste um trade fechado no historico."""
+    """Persiste um trade no historico, referenciando o llm_log correspondente."""
     try:
-        _client.table("trades").insert({
+        payload = {
             "symbol":       symbol,
             "action":       action,
             "confidence":   confidence,
@@ -135,8 +153,10 @@ def save_trade(
             "tp":           tp,
             "pnl":          pnl,
             "reason":       reason,
-            "llm_context":  llm_context,
-            "llm_response": llm_response,
-        }).execute()
+        }
+        if llm_log_id:
+            payload["llm_log_id"] = llm_log_id
+
+        _client.table("trades").insert(payload).execute()
     except Exception as e:
         log.error(f"Erro ao salvar trade no banco ({symbol}): {e}")
