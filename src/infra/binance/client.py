@@ -19,16 +19,15 @@ log = logging.getLogger(__name__)
 # Nao requer autenticacao pois endpoints de mercado sao publicos
 market_client = Client(
     BINANCE_API_KEY, 
-    BINANCE_SECRET_KEY, 
-    testnet=False
+    BINANCE_SECRET_KEY
 )
 
 # Testnet -- execucao de ordens simuladas (sem dinheiro real)
 trade_client = Client(
     BINANCE_TESTNET_API_KEY,
     BINANCE_TESTNET_SECRET_KEY,
-    testnet=True,
 )
+trade_client.API_URL = "https://testnet.binance.vision/api"
 
 
 def get_balance(asset: str) -> float:
