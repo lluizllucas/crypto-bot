@@ -17,6 +17,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_KEY }}
           script: |
+            set -e
+
             cd ~/trading-bot
             git pull origin main
 
@@ -30,3 +32,7 @@ jobs:
               --restart unless-stopped \
               --env-file .env \
               trading-bot
+
+            sleep 5
+            docker ps -a --filter name=trading-bot
+            docker logs trading-bot --tail 30
