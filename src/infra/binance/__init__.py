@@ -1,5 +1,4 @@
 from src.infra.binance.client import (
-    client,
     get_balance,
     get_current_price,
     get_symbol_filters,
@@ -11,7 +10,6 @@ from src.infra.binance.client import (
 )
 
 __all__ = [
-    "client",
     "get_balance",
     "get_current_price",
     "get_symbol_filters",

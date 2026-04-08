@@ -1,5 +1,4 @@
 from src.infra.binance.client import (
-    client,
     get_balance,
     get_current_price,
     get_symbol_filters,
@@ -13,7 +12,6 @@ from src.infra.logging.setup import setup_logging
 
 __all__ = [
     # binance
-    "client",
     "get_balance",
     "get_current_price",
     "get_symbol_filters",
