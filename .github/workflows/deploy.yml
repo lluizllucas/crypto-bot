@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout codigo
+        uses: actions/checkout@v4
+
       - name: Deploy no servidor
         uses: appleboy/ssh-action@v1
         with:
@@ -27,6 +30,5 @@ jobs:
 
             docker run -d \
               --name trading-bot \
-              --restart unless-stopped \
               --env-file .env \
               trading-bot
