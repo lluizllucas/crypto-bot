@@ -16,6 +16,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_KEY }}
+          envs: OPENROUTER_API_KEY,BINANCE_TESTNET_API_KEY,BINANCE_TESTNET_SECRET_KEY,BINANCE_API_KEY,BINANCE_SECRET_KEY,DISCORD_WEBHOOK_URL,SUPABASE_URL,SUPABASE_KEY,SUPABASE_SERVICE_KEY
           script: |
             if [ ! -d ~/trading-bot ]; then
               git clone https://github.com/${{ github.repository }}.git ~/trading-bot
@@ -27,26 +28,41 @@ jobs:
 
             docker stop trading-bot || true
             docker rm trading-bot || true
-
-            # Limpa imagens e containers antigos para liberar disco
             docker system prune -a -f
+
+            # Cria .env temporario com as variaveis recebidas
+            cat > /tmp/trading-bot.env << EOF
+            OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+            BINANCE_TESTNET_API_KEY=${BINANCE_TESTNET_API_KEY}
+            BINANCE_TESTNET_SECRET_KEY=${BINANCE_TESTNET_SECRET_KEY}
+            BINANCE_API_KEY=${BINANCE_API_KEY}
+            BINANCE_SECRET_KEY=${BINANCE_SECRET_KEY}
+            DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+            SUPABASE_URL=${SUPABASE_URL}
+            SUPABASE_KEY=${SUPABASE_KEY}
+            SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+            EOF
 
             docker build -t trading-bot .
 
             docker run -d \
               --name trading-bot \
               --restart unless-stopped \
-              --env OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
-              --env BINANCE_TESTNET_API_KEY="${{ secrets.BINANCE_TESTNET_API_KEY }}" \
-              --env BINANCE_TESTNET_SECRET_KEY="${{ secrets.BINANCE_TESTNET_SECRET_KEY }}" \
-              --env BINANCE_API_KEY="${{ secrets.BINANCE_API_KEY }}" \
-              --env BINANCE_SECRET_KEY="${{ secrets.BINANCE_SECRET_KEY }}" \
-              --env DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}" \
-              --env SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
-              --env SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
-              --env SUPABASE_SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_KEY }}" \
+              --env-file /tmp/trading-bot.env \
               trading-bot
 
+            rm -f /tmp/trading-bot.env
+
             sleep 10
-            docker ps -a --filter name=trading-bot
-            docker logs trading-bot --tail 30 2>&1
+            docker ps --filter name=trading-bot
+            docker logs trading-bot --tail 10 2>&1
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          BINANCE_TESTNET_API_KEY: ${{ secrets.BINANCE_TESTNET_API_KEY }}
+          BINANCE_TESTNET_SECRET_KEY: ${{ secrets.BINANCE_TESTNET_SECRET_KEY }}
+          BINANCE_API_KEY: ${{ secrets.BINANCE_API_KEY }}
+          BINANCE_SECRET_KEY: ${{ secrets.BINANCE_SECRET_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
