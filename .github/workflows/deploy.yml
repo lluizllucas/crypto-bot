@@ -20,6 +20,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_KEY }}
           script: |
+            set -e
+
             cd ~/trading-bot
             git pull origin main
 
@@ -30,5 +32,18 @@ jobs:
 
             docker run -d \
               --name trading-bot \
-              --env-file .env \
+              --restart unless-stopped \
+              --env OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
+              --env BINANCE_TESTNET_API_KEY="${{ secrets.BINANCE_TESTNET_API_KEY }}" \
+              --env BINANCE_TESTNET_SECRET_KEY="${{ secrets.BINANCE_TESTNET_SECRET_KEY }}" \
+              --env BINANCE_API_KEY="${{ secrets.BINANCE_API_KEY }}" \
+              --env BINANCE_SECRET_KEY="${{ secrets.BINANCE_SECRET_KEY }}" \
+              --env DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              --env SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+              --env SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
+              --env SUPABASE_SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_KEY }}" \
               trading-bot
+
+            sleep 5
+            docker ps -a --filter name=trading-bot
+            docker logs trading-bot --tail 30
