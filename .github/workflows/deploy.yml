@@ -18,6 +18,12 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           script_stop: false
           script: |
+            echo "=== Identificacao do servidor ==="
+            echo "Hostname: $(hostname)"
+            echo "IP: $(curl -s ifconfig.me || echo 'sem acesso externo')"
+            echo "User: $(whoami)"
+            echo "================================="
+
             if [ ! -d ~/trading-bot ]; then
               git clone https://github.com/${{ github.repository }}.git ~/trading-bot
             fi
@@ -47,7 +53,10 @@ jobs:
               trading-bot
 
             sleep 5
+            echo "=== docker ps (running) ==="
             docker ps --filter name=trading-bot
+            echo "=== docker ps -a (todos) ==="
+            docker ps -a --filter name=trading-bot
             docker logs trading-bot -f &
             LOG_PID=$!
             sleep 60
