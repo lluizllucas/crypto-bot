@@ -30,7 +30,15 @@ jobs:
             docker run -d \
               --name trading-bot \
               --restart unless-stopped \
-              --env-file .env \
+              --env OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
+              --env BINANCE_TESTNET_API_KEY="${{ secrets.BINANCE_TESTNET_API_KEY }}" \
+              --env BINANCE_TESTNET_SECRET_KEY="${{ secrets.BINANCE_TESTNET_SECRET_KEY }}" \
+              --env BINANCE_API_KEY="${{ secrets.BINANCE_API_KEY }}" \
+              --env BINANCE_SECRET_KEY="${{ secrets.BINANCE_SECRET_KEY }}" \
+              --env DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              --env SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+              --env SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
+              --env SUPABASE_SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_KEY }}" \
               trading-bot
 
             sleep 5
