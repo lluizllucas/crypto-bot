@@ -48,4 +48,7 @@ jobs:
 
             sleep 5
             docker ps --filter name=trading-bot
-            docker logs trading-bot --tail 30 2>&1
+            docker logs trading-bot -f &
+            LOG_PID=$!
+            sleep 60
+            kill $LOG_PID 2>/dev/null || true
