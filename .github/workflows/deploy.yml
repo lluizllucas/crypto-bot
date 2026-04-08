@@ -10,34 +10,68 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy no servidor
+      - name: Deploy no servidor EC2
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_KEY }}
-          script_stop: false
+          script_stop: true
           script: |
-            echo "=== Identificacao do servidor ==="
-            echo "Hostname: $(hostname)"
-            echo "IP: $(curl -s ifconfig.me || echo 'sem acesso externo')"
-            echo "User: $(whoami)"
-            echo "================================="
+            set -e
 
-            if [ ! -d ~/trading-bot ]; then
-              git clone https://github.com/${{ github.repository }}.git ~/trading-bot
+            echo "================ DEBUG SERVIDOR ================"
+            echo "Usuario:"
+            whoami
+
+            echo "Hostname:"
+            hostname
+
+            echo "Diretorio atual:"
+            pwd
+
+            echo "Home:"
+            echo $HOME
+
+            echo "IP publico:"
+            curl -s ifconfig.me || true
+            echo ""
+
+            echo "================ DOCKER ANTES ================"
+            docker ps -a || true
+
+            if [ ! -d "$HOME/trading-bot" ]; then
+              echo "Clonando repositorio..."
+              git clone https://github.com/${{ github.repository }}.git "$HOME/trading-bot"
             fi
 
-            cd ~/trading-bot
+            cd "$HOME/trading-bot"
+
+            echo "================ ATUALIZANDO CODIGO ================"
             git fetch origin main
             git reset --hard origin/main
 
-            docker stop trading-bot || true
-            docker rm trading-bot || true
-            docker image prune -f
+            echo "================ REMOVENDO CONTAINER ANTIGO ================"
 
+            if docker ps -a --format '{{.Names}}' | grep -q '^trading-bot$'; then
+              echo "Container encontrado. Removendo..."
+
+              docker stop trading-bot
+              docker rm trading-bot
+
+              echo "Container removido com sucesso."
+            else
+              echo "Container trading-bot não encontrado."
+            fi
+
+            echo "================ LIMPEZA ================"
+            docker image prune -f
+            echo "Limpeza concluída."
+
+            echo "================ BUILD ================"
             docker build -t trading-bot .
 
+            echo "================ SUBINDO CONTAINER ================"
             docker run -d \
               --name trading-bot \
               --restart unless-stopped \
@@ -52,12 +86,26 @@ jobs:
               --env SUPABASE_SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_KEY }}" \
               trading-bot
 
-            sleep 5
-            echo "=== docker ps (running) ==="
-            docker ps --filter name=trading-bot
-            echo "=== docker ps -a (todos) ==="
-            docker ps -a --filter name=trading-bot
-            docker logs trading-bot -f &
-            LOG_PID=$!
-            sleep 60
-            kill $LOG_PID 2>/dev/null || true
+            echo "Aguardando container iniciar..."
+            sleep 10
+
+            echo "================ DOCKER DEPOIS ================"
+            docker ps
+            docker ps -a
+
+            echo "================ LOGS ================"
+
+            if docker ps -a --format '{{.Names}}' | grep -q '^trading-bot$'; then
+              echo "Container encontrado. Exibindo últimos 100 logs..."
+              docker logs trading-bot --tail 100
+            else
+              echo "Container trading-bot não encontrado. Nenhum log para exibir."
+            fi
+
+            echo "================ STATUS FINAL ================"
+
+            if docker ps -a --format '{{.Names}}' | grep -q '^trading-bot$'; then
+              docker inspect trading-bot --format='Status: {{.State.Status}}'
+            else
+              echo "Container não existe."
+            fi
