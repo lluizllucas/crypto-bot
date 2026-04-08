@@ -28,9 +28,10 @@ jobs:
             docker stop trading-bot || true
             docker rm trading-bot || true
 
-            docker build --no-cache -t trading-bot .
+            # Limpa imagens e containers antigos para liberar disco
+            docker system prune -a -f
 
-            echo "=== Starting container ==="
+            docker build -t trading-bot .
 
             docker run -d \
               --name trading-bot \
@@ -46,9 +47,6 @@ jobs:
               --env SUPABASE_SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_KEY }}" \
               trading-bot
 
-            echo "=== Container status ==="
             sleep 10
-            docker ps -a
-
-            echo "=== Container logs ==="
-            docker logs trading-bot 2>&1 || echo "No logs available"
+            docker ps -a --filter name=trading-bot
+            docker logs trading-bot --tail 30 2>&1
