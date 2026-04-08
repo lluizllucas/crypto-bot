@@ -242,14 +242,23 @@ if __name__ == "__main__":
     log.info("=" * 55)
 
     load_state()
-    run_cycle()
+
+    try:
+        run_cycle()
+    except Exception:
+        log.exception("Erro no ciclo inicial -- bot continua agendado")
 
     schedule.every(INTERVAL_MINUTES).minutes.do(run_cycle)
     schedule.every(MONITOR_INTERVAL_MINUTES).minutes.do(monitor_positions)
-    
+
     schedule.every().day.at("00:00").do(log_daily_summary)
     schedule.every().sunday.at("00:00").do(log_weekly_pnl)
 
+    log.info("Scheduler ativo -- aguardando proximos ciclos...")
+
     while True:
-        schedule.run_pending()
+        try:
+            schedule.run_pending()
+        except Exception:
+            log.exception("Erro em job agendado -- scheduler continua")
         time.sleep(15)

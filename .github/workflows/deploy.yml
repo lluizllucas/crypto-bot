@@ -28,21 +28,9 @@ jobs:
 
             docker stop trading-bot || true
             docker rm trading-bot || true
-            docker system prune -a -f
+            docker image prune -f
 
             docker build -t trading-bot .
-
-            echo "=== Verificando secrets ==="
-            echo "OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY && 'OK' || 'VAZIO' }}"
-            echo "BINANCE_TESTNET_API_KEY: ${{ secrets.BINANCE_TESTNET_API_KEY && 'OK' || 'VAZIO' }}"
-            echo "BINANCE_TESTNET_SECRET_KEY: ${{ secrets.BINANCE_TESTNET_SECRET_KEY && 'OK' || 'VAZIO' }}"
-            echo "BINANCE_API_KEY: ${{ secrets.BINANCE_API_KEY && 'OK' || 'VAZIO' }}"
-            echo "BINANCE_SECRET_KEY: ${{ secrets.BINANCE_SECRET_KEY && 'OK' || 'VAZIO' }}"
-            echo "DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL && 'OK' || 'VAZIO' }}"
-            echo "SUPABASE_URL: ${{ secrets.SUPABASE_URL && 'OK' || 'VAZIO' }}"
-            echo "SUPABASE_KEY: ${{ secrets.SUPABASE_KEY && 'OK' || 'VAZIO' }}"
-            echo "SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY && 'OK' || 'VAZIO' }}"
-            echo "==========================="
 
             docker run -d \
               --name trading-bot \
@@ -58,6 +46,6 @@ jobs:
               --env SUPABASE_SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_KEY }}" \
               trading-bot
 
-            sleep 10
+            sleep 5
             docker ps --filter name=trading-bot
-            docker logs trading-bot --tail 15 2>&1
+            docker logs trading-bot --tail 30 2>&1
