@@ -14,6 +14,7 @@ RUN mkdir -p /app/logs
 
 # Copia o pacote src completo
 COPY src/ ./src/
+COPY .env .
 
 # Comando que roda quando o container iniciar
 CMD ["python", "-m", "src.bot"]
