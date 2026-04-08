@@ -23,6 +23,9 @@ jobs:
             echo "Usuario:"
             whoami
 
+            echo "PUBLIC IP:"
+            curl -s ifconfig.me
+
             echo "Hostname:"
             hostname
 
