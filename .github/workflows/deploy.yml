@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout codigo
-        uses: actions/checkout@v4
-
       - name: Deploy no servidor
         uses: appleboy/ssh-action@v1
         with:
