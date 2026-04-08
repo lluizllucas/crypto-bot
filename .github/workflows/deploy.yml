@@ -72,7 +72,7 @@ jobs:
             docker build -t trading-bot .
 
             echo "================ SUBINDO CONTAINER ================"
-            docker run -d \
+            nohup docker run -d \
               --name trading-bot \
               --restart unless-stopped \
               --env OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
@@ -84,7 +84,7 @@ jobs:
               --env SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
               --env SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
               --env SUPABASE_SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_KEY }}" \
-              trading-bot
+              trading-bot > /dev/null 2>&1 &
 
             echo "Aguardando container iniciar..."
             sleep 10
