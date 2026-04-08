@@ -17,8 +17,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_KEY }}
           script: |
-            set -e
-
             if [ ! -d ~/trading-bot ]; then
               git clone https://github.com/${{ github.repository }}.git ~/trading-bot
             fi
@@ -32,7 +30,9 @@ jobs:
 
             docker build --no-cache -t trading-bot .
 
-            nohup docker run -d \
+            echo "=== Starting container ==="
+
+            docker run -d \
               --name trading-bot \
               --restart unless-stopped \
               --env OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
@@ -44,7 +44,11 @@ jobs:
               --env SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
               --env SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
               --env SUPABASE_SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_KEY }}" \
-              trading-bot > /dev/null 2>&1 &
+              trading-bot
 
-            sleep 5
-            docker ps -a --filter name=trading-bot
+            echo "=== Container status ==="
+            sleep 10
+            docker ps -a
+
+            echo "=== Container logs ==="
+            docker logs trading-bot 2>&1 || echo "No logs available"
