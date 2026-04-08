@@ -22,8 +22,13 @@ jobs:
           script: |
             set -e
 
+            if [ ! -d ~/trading-bot ]; then
+              git clone https://github.com/${{ github.repository }}.git ~/trading-bot
+            fi
+
             cd ~/trading-bot
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
 
             docker stop trading-bot || true
             docker rm trading-bot || true
