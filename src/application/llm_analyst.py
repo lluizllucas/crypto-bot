@@ -4,7 +4,6 @@ Recebe um MarketData completo, envia contexto JSON estruturado e retorna um Trad
 """
 
 import json
-import time
 import logging
 
 from openai import OpenAI
@@ -160,14 +159,11 @@ def analyze(data: MarketData, open_positions: dict | None = None) -> TradeSignal
                 reason=_sanitize(result.get("reason", "")),
             )
         except Exception as e:
-            wait = attempt * 15
-
             if attempt < 3:
                 log.warning(
                     f"Tentativa {attempt} falhou para {data.symbol}: "
-                    f"{_sanitize(str(e))} -- aguardando {wait}s"
+                    f"{_sanitize(str(e))} -- tentando novamente sem espera"
                 )
-                time.sleep(wait)
             else:
                 log.error(
                     f"Erro na analise LLM para {data.symbol} "

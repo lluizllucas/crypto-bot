@@ -3,8 +3,7 @@ Crypto Trading Bot -- OpenRouter (estrategista) + Binance Testnet (simulacao)
 Stack 100% gratuito, sem dados fiscais, funciona no Brasil
 """
 
-import time
-import schedule
+import sys
 
 from datetime import datetime, timedelta, timezone
 
@@ -220,8 +219,6 @@ def run_cycle():
         if not daily_limit_hit:
             execute_trade(symbol, signal, price, llm_log_id=llm_log_id)
 
-        time.sleep(10)
-
     log.info("Ciclo concluido.")
 
 
@@ -244,21 +241,12 @@ if __name__ == "__main__":
     load_state()
 
     try:
+        monitor_positions()
         run_cycle()
+        log_daily_summary()
+        log_weekly_pnl()
     except Exception:
-        log.exception("Erro no ciclo inicial -- bot continua agendado")
+        log.exception("Erro na execucao unica do bot")
+        sys.exit(1)
 
-    schedule.every(INTERVAL_MINUTES).minutes.do(run_cycle)
-    schedule.every(MONITOR_INTERVAL_MINUTES).minutes.do(monitor_positions)
-
-    schedule.every().day.at("00:00").do(log_daily_summary)
-    schedule.every().sunday.at("00:00").do(log_weekly_pnl)
-
-    log.info("Scheduler ativo -- aguardando proximos ciclos...")
-
-    while True:
-        try:
-            schedule.run_pending()
-        except Exception:
-            log.exception("Erro em job agendado -- scheduler continua")
-        time.sleep(15)
+    sys.exit(0)
