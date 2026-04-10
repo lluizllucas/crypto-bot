@@ -10,8 +10,6 @@ from datetime import datetime, timedelta, timezone
 from src.infra import setup_logging, get_balance, get_current_price
 from src.config import (
     SYMBOLS,
-    INTERVAL_MINUTES,
-    MONITOR_INTERVAL_MINUTES,
     MAX_DAILY_LOSS_USDT,
     TRADE_USDT,
     MAX_POSITIONS_PER_SYMBOL,
@@ -229,8 +227,8 @@ if __name__ == "__main__":
     log.info(
         "---Crypto Bot iniciado -- OpenRouter + Binance TESTNET by lluizllucas---")
     log.info(f"  Simbolos:              {', '.join(SYMBOLS)}")
-    log.info(f"  Analise:               a cada {INTERVAL_MINUTES} min")
-    log.info(f"  Monitor SL/TP:         a cada {MONITOR_INTERVAL_MINUTES} min")
+    log.info(f"  Analise:               a cada 15 min")
+    log.info(f"  Monitor SL/TP:         a cada 5 min")
     log.info(f"  USDT por trade:        ${TRADE_USDT}")
     log.info(f"  Max lotes/par:         {MAX_POSITIONS_PER_SYMBOL}")
     log.info(f"  Dist. min. entrada:    {MIN_ENTRY_DISTANCE_PCT}%")
