@@ -11,6 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Cria diretorio de logs
 RUN mkdir -p /app/logs
+ENV PYTHONPATH=/app
 
 # Copia o pacote src completo
 COPY src/ ./src/

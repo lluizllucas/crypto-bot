@@ -5,111 +5,33 @@ on:
     branches:
       - main
 
+env:
+  AWS_REGION:      sa-east-1
+  ECR_REPOSITORY:  trading-bot-repo
+  IMAGE_TAG:       latest
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy no servidor EC2
-        uses: appleboy/ssh-action@v1
+      - name: Checkout codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_KEY }}
-          script: |
-            set -e
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
 
-            echo "================ DEBUG SERVIDOR ================"
-            echo "Usuario:"
-            whoami
+      - name: Login no Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-            echo "PUBLIC IP:"
-            curl -s ifconfig.me
-
-            echo "Hostname:"
-            hostname
-
-            echo "Diretorio atual:"
-            pwd
-
-            echo "Home:"
-            echo $HOME
-
-            echo "IP publico:"
-            curl -s ifconfig.me || true
-            echo ""
-
-            echo "================ DOCKER ANTES ================"
-            docker ps -a || true
-
-            if [ ! -d "$HOME/trading-bot" ]; then
-              echo "Clonando repositorio..."
-              git clone https://github.com/${{ github.repository }}.git "$HOME/trading-bot"
-            fi
-
-            cd "$HOME/trading-bot"
-
-            echo "================ ATUALIZANDO CODIGO ================"
-            git fetch origin main
-            git reset --hard origin/main
-
-            echo "================ REMOVENDO CONTAINER ANTIGO ================"
-
-            if docker ps -a --format '{{.Names}}' | grep -q '^trading-bot$'; then
-              echo "Container encontrado. Removendo..."
-
-              docker stop trading-bot
-              docker rm trading-bot
-
-              echo "Container removido com sucesso."
-            else
-              echo "Container trading-bot não encontrado."
-            fi
-
-            echo "================ LIMPEZA ================"
-            docker image prune -f
-            echo "Limpeza concluída."
-
-            echo "================ BUILD ================"
-            docker build -t trading-bot .
-
-            echo "================ SUBINDO CONTAINER ================"
-            docker run -d \
-              --name trading-bot \
-              --restart always \
-              --init \
-              --env OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}" \
-              --env BINANCE_TESTNET_API_KEY="${{ secrets.BINANCE_TESTNET_API_KEY }}" \
-              --env BINANCE_TESTNET_SECRET_KEY="${{ secrets.BINANCE_TESTNET_SECRET_KEY }}" \
-              --env BINANCE_API_KEY="${{ secrets.BINANCE_API_KEY }}" \
-              --env BINANCE_SECRET_KEY="${{ secrets.BINANCE_SECRET_KEY }}" \
-              --env DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}" \
-              --env SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
-              --env SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
-              --env SUPABASE_SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_KEY }}" \
-              -v "$HOME/trading-bot/logs:/app/logs" \
-              trading-bot
-
-            echo "Aguardando container iniciar..."
-            sleep 10
-
-            echo "================ DOCKER DEPOIS ================"
-            docker ps
-            docker ps -a
-
-            echo "================ LOGS ================"
-
-            if docker ps -a --format '{{.Names}}' | grep -q '^trading-bot$'; then
-              echo "Container encontrado. Exibindo últimos 100 logs..."
-              docker logs trading-bot --tail 100
-            else
-              echo "Container trading-bot não encontrado. Nenhum log para exibir."
-            fi
-
-            echo "================ STATUS FINAL ================"
-
-            if docker ps -a --format '{{.Names}}' | grep -q '^trading-bot$'; then
-              docker inspect trading-bot --format='Status: {{.State.Status}}'
-            else
-              echo "Container não existe."
-            fi
+      - name: Build e push da imagem para ECR
+        run: |
+          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
+          docker build -t "$IMAGE_URI" .
+          docker push "$IMAGE_URI"
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_STEP_SUMMARY
