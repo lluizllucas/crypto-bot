@@ -18,6 +18,8 @@ from src.config import (
 
 from src.domain.models import Position, SessionStats, TradeSignal
 
+from src.infra import setup_logging
+
 from src.application.notifier import discord_notify
 
 from src.infra.binance.client import (
@@ -38,7 +40,7 @@ from src.infra.supabase.repository import (
 )
 
 
-log = logging.getLogger(__name__)
+log = setup_logging()
 
 # Posicoes abertas em memoria -- carregadas do Supabase na inicializacao
 # { "BTCUSDT": [Position, ...] }

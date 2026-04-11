@@ -8,6 +8,7 @@ import logging
 import pandas as pd
 from binance.client import Client
 from binance.exceptions import BinanceAPIException
+from src.infra import setup_logging
 
 from src.domain.models import MarketData
 
@@ -16,7 +17,7 @@ from src.application.fear_greed import get_fear_greed
 
 from src.infra.binance.client import get_klines, get_ticker
 
-log = logging.getLogger(__name__)
+log = setup_logging()
 
 
 def _range_position(price: float, low: float, high: float) -> float:

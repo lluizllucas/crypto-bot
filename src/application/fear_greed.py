@@ -10,8 +10,10 @@ Escala:
 
 import logging
 import requests
+from src.infra import setup_logging
 
-log = logging.getLogger(__name__)
+
+log = setup_logging()
 
 _URL = "https://api.alternative.me/fng/"
 

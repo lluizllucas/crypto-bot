@@ -8,12 +8,14 @@ Dois clientes separados:
 
 import math
 import logging
+from src.infra import setup_logging
+
 
 from binance.client import Client
 
 from src.config import BINANCE_TESTNET_API_KEY, BINANCE_TESTNET_SECRET_KEY, BINANCE_API_KEY, BINANCE_SECRET_KEY
 
-log = logging.getLogger(__name__)
+log = setup_logging()
 
 # Mainnet -- dados de mercado reais (candles, ticker, preco)
 # Nao requer autenticacao pois endpoints de mercado sao publicos
