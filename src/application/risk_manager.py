@@ -76,7 +76,7 @@ def check_daily_loss_limit() -> bool:
     """Retorna True se o limite de perda diaria foi atingido."""
     global daily_loss_usdt, daily_loss_date
 
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
     if daily_loss_date != today:
         if daily_loss_date:

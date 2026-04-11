@@ -3,16 +3,13 @@ Crypto Trading Bot -- OpenRouter (estrategista) + Binance Testnet (simulacao)
 Stack 100% gratuito, sem dados fiscais, funciona no Brasil
 """
 
-import time
-import schedule
+import sys
 
 from datetime import datetime, timedelta, timezone
 
 from src.infra import setup_logging, get_balance, get_current_price
 from src.config import (
     SYMBOLS,
-    INTERVAL_MINUTES,
-    MONITOR_INTERVAL_MINUTES,
     MAX_DAILY_LOSS_USDT,
     TRADE_USDT,
     MAX_POSITIONS_PER_SYMBOL,
@@ -220,8 +217,6 @@ def run_cycle():
         if not daily_limit_hit:
             execute_trade(symbol, signal, price, llm_log_id=llm_log_id)
 
-        time.sleep(10)
-
     log.info("Ciclo concluido.")
 
 
@@ -232,8 +227,8 @@ if __name__ == "__main__":
     log.info(
         "---Crypto Bot iniciado -- OpenRouter + Binance TESTNET by lluizllucas---")
     log.info(f"  Simbolos:              {', '.join(SYMBOLS)}")
-    log.info(f"  Analise:               a cada {INTERVAL_MINUTES} min")
-    log.info(f"  Monitor SL/TP:         a cada {MONITOR_INTERVAL_MINUTES} min")
+    log.info(f"  Analise:               a cada 15 min")
+    log.info(f"  Monitor SL/TP:         a cada 5 min")
     log.info(f"  USDT por trade:        ${TRADE_USDT}")
     log.info(f"  Max lotes/par:         {MAX_POSITIONS_PER_SYMBOL}")
     log.info(f"  Dist. min. entrada:    {MIN_ENTRY_DISTANCE_PCT}%")
@@ -244,21 +239,12 @@ if __name__ == "__main__":
     load_state()
 
     try:
+        monitor_positions()
         run_cycle()
+        log_daily_summary()
+        log_weekly_pnl()
     except Exception:
-        log.exception("Erro no ciclo inicial -- bot continua agendado")
+        log.exception("Erro na execucao unica do bot")
+        sys.exit(1)
 
-    schedule.every(INTERVAL_MINUTES).minutes.do(run_cycle)
-    schedule.every(MONITOR_INTERVAL_MINUTES).minutes.do(monitor_positions)
-
-    schedule.every().day.at("00:00").do(log_daily_summary)
-    schedule.every().sunday.at("00:00").do(log_weekly_pnl)
-
-    log.info("Scheduler ativo -- aguardando proximos ciclos...")
-
-    while True:
-        try:
-            schedule.run_pending()
-        except Exception:
-            log.exception("Erro em job agendado -- scheduler continua")
-        time.sleep(15)
+    sys.exit(0)

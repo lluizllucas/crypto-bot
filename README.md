@@ -2,7 +2,7 @@
 
 Bot de trading de criptomoedas que usa LLM (via OpenRouter) como estrategista
 para analisar dados de mercado e tomar decisoes de BUY / SELL / HOLD.
-Roda 24/7 em VPS na nuvem com gestao de risco automatica e notificacoes no Discord.
+Modelo atual: execucao serverless/efemera (ECS Fargate + EventBridge), sem loop 24/7.
 
 **Backtest validado:** 365 dias de dados reais (mar/2025 a mar/2026)
 - Par: BTCUSDT | Capital inicial: $500
@@ -37,45 +37,34 @@ cp config.example.py config.py
 | BINANCE_SECRET_KEY | https://testnet.binance.vision |
 | DISCORD_WEBHOOK_URL | Canal Discord → Integrações → Webhooks |
 
-## Uso com Docker (recomendado)
+## Uso com Docker (serverless entrypoints)
 ```bash
 docker build -t crypto-bot .
-docker run -d --name trading-bot crypto-bot
-```
-
-Ver logs em tempo real:
-```bash
-docker logs -f trading-bot
-```
-
-Parar o bot:
-```bash
-docker stop trading-bot
+docker run --rm crypto-bot src/check_sl_tp.py
+docker run --rm crypto-bot src/analysis_llm.py
 ```
 
 ## Uso sem Docker
 ```bash
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-python3 bot.py
+python3 src/check_sl_tp.py
+python3 src/analysis_llm.py
 ```
 
-## Deploy em VPS (Linux)
+## Build e push para ECR
 ```bash
-sudo systemctl start trading-bot
-sudo systemctl status trading-bot
-sudo journalctl -fu trading-bot
+AWS_REGION=us-east-1 \
+AWS_ACCOUNT_ID=123456789012 \
+ECR_REPOSITORY=trading-bot-repo \
+IMAGE_TAG=latest \
+./scripts/build_and_push.sh
 ```
-
-> A VPS deve estar na regiao de Sao Paulo (sa-east-1) na AWS.
-> IPs americanos sao bloqueados pela Binance Testnet.
 
 ## Arquitetura
 ```
-bot.py
-  ├── run_cycle()          ← analise LLM a cada 60 min
-  ├── monitor_positions()  ← verifica SL/TP a cada 5 min
-  └── log_daily_summary()  ← resumo automatico a meia-noite
+src/check_sl_tp.py   ← execucao unica de verificacao de SL/TP
+src/analysis_llm.py  ← execucao unica de analise LLM + execucao de ordens
 
 backtest.py      ← simulacao historica de 365 dias
 analyze_logs.py  ← relatorio de performance dos logs reais
