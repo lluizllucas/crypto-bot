@@ -9,11 +9,8 @@ Escala:
 """
 
 import logging
+log = logging.getLogger("bot")
 import requests
-from src.infra import setup_logging
-
-
-log = setup_logging()
 
 _URL = "https://api.alternative.me/fng/"
 

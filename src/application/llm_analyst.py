@@ -5,16 +5,14 @@ Recebe um MarketData completo, envia contexto JSON estruturado e retorna um Trad
 
 import json
 import logging
+log = logging.getLogger("bot")
 
 from openai import OpenAI
-
-from src.infra import setup_logging
 
 from src.config import OPENROUTER_API_KEY, MIN_CONFIDENCE
 
 from src.domain.models import MarketData, TradeSignal
 
-log = setup_logging()
 
 _llm = OpenAI(
     base_url="https://openrouter.ai/api/v1",

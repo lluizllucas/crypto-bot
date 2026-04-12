@@ -2,13 +2,12 @@
 Notificacoes via Discord webhook.
 """
 
+
 import logging
-from src.infra import setup_logging
+log = logging.getLogger("bot")
 from datetime import datetime, timezone
 
 from src.config import DISCORD_WEBHOOK_URL
-
-log = setup_logging()
 
 
 def discord_notify(title: str, message: str, color: int = 0x5865F2):
