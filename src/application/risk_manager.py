@@ -4,6 +4,7 @@ limite diario e execucao de ordens.
 """
 
 import logging
+log = logging.getLogger("bot")
 from datetime import datetime, timezone
 
 from binance.exceptions import BinanceAPIException
@@ -18,7 +19,6 @@ from src.config import (
 
 from src.domain.models import Position, SessionStats, TradeSignal
 
-from src.infra import setup_logging
 
 from src.application.notifier import discord_notify
 
@@ -39,8 +39,6 @@ from src.infra.supabase.repository import (
     save_trade,
 )
 
-
-log = setup_logging()
 
 # Posicoes abertas em memoria -- carregadas do Supabase na inicializacao
 # { "BTCUSDT": [Position, ...] }
