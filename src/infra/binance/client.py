@@ -34,7 +34,7 @@ trade_client.API_URL = "https://testnet.binance.vision/api"
 def get_balance(asset: str) -> float:
     """Retorna o saldo disponivel de um asset na testnet."""
     try:
-        balance = market_client.get_asset_balance(asset=asset)
+        balance = trade_client.get_asset_balance(asset=asset)
         return float(balance["free"]) if balance else 0.0
     except Exception as e:
         log.error(f"Erro ao buscar saldo de {asset}: {e}")
