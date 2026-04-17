@@ -1,7 +1,7 @@
 from src.application.indicators import add_indicators
 from src.application.signal_generator import generate_signal
 from src.application.market_data import get_market_data
-from src.application.llm_analyst import analyze
+from src.application.llm_analyst import analyze_monitor
 from src.application.fear_greed import get_fear_greed
 from src.application.risk_manager import (
     check_daily_loss_limit,
