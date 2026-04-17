@@ -4,6 +4,13 @@ Este script roda uma unica vez e encerra, ideal para EventBridge + ECS Fargate.
 """
 
 import sys
+from pathlib import Path
+
+# Raiz do projeto (/app no Docker): necessario se rodar `python src/analysis_llm.py`
+_root = Path(__file__).resolve().parents[1]
+if str(_root) not in sys.path:
+    sys.path.insert(0, str(_root))
+
 from datetime import datetime, timezone
 
 from src.config import SYMBOLS, MAX_DAILY_LOSS_USDT

@@ -17,8 +17,10 @@ ENV PYTHONPATH=/app
 COPY src/ ./src/
 
 # Entry-point generico para permitir override por comando no ECS/EventBridge.
-# Exemplo:
-# - python src/check_sl_tp.py
-# - python src/analysis_llm.py
+# Use sempre modulo (-m) para sys.path incluir /app e `import src` funcionar.
+# Exemplos:
+# - python -m src.check_sl_tp
+# - python -m src.analysis_llm
+# - python -m src.bot
 ENTRYPOINT ["python"]
-CMD ["src/analysis_llm.py"]
+CMD ["-m", "src.analysis_llm"]
