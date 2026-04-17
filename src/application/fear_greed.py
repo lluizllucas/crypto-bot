@@ -2,10 +2,10 @@
 Fear & Greed Index via Alternative.me (gratuito, sem autenticacao).
 
 Escala:
-  0-25  -> Medo extremo
-  25-50 -> Medo
-  50-75 -> Ganancia
-  75-100 -> Ganancia extrema
+  0-25  -> Extreme Fear
+  25-50 -> Fear
+  50-75 -> Greed
+  75-100 -> Extreme Greed
 """
 
 import logging
@@ -15,22 +15,34 @@ import requests
 _URL = "https://api.alternative.me/fng/"
 
 
-def get_fear_greed() -> int:
+def _label(value: int) -> str:
+    if value <= 25:
+        return "Extreme Fear"
+    if value <= 50:
+        return "Fear"
+    if value <= 75:
+        return "Greed"
+    return "Extreme Greed"
+
+
+def get_fear_greed() -> tuple[int, str]:
     """
-    Retorna o valor atual do Fear & Greed Index (0-100).
-    Retorna 50 (neutro) em caso de erro para nao bloquear o ciclo.
+    Retorna (value, label) do Fear & Greed Index atual.
+    Retorna (50, "Neutral") em caso de erro para nao bloquear o ciclo.
     """
     try:
         response = requests.get(_URL, timeout=5)
         response.raise_for_status()
 
-        value = int(response.json()["data"][0]["value"])
+        data  = response.json()["data"][0]
+        value = int(data["value"])
+        label = _label(value)
 
-        log.info(f"Fear & Greed Index: {value}")
+        log.info(f"Fear & Greed Index: {value} ({label})")
 
-        return value
+        return value, label
 
     except Exception as e:
         log.warning(
-            f"Erro ao buscar Fear & Greed Index: {e} -- usando 50 (neutro)")
-        return 50
+            f"Erro ao buscar Fear & Greed Index: {e} -- usando 50 (Neutral)")
+        return 50, "Neutral"

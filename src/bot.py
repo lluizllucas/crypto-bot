@@ -1,10 +1,15 @@
 """
-Crypto Trading Bot -- OpenRouter (estrategista) + Binance Testnet (simulacao)
-Stack 100% gratuito, sem dados fiscais, funciona no Brasil
+Crypto Trading Bot — ciclo principal de analise (a cada 15 min).
+Execucao efemera via EventBridge + ECS Fargate.
+
+Responsabilidades:
+- Busca dados de mercado completos
+- Consulta LLM via tools para decisoes estrategicas (BUY / SELL por posicao)
+- Executa ordens e persiste no banco
+- Gera resumo diario e semanal
 """
 
 import sys
-
 from datetime import datetime, timedelta, timezone
 
 from src.infra import setup_logging, get_balance, get_current_price
@@ -14,19 +19,21 @@ from src.config import (
     TRADE_USDT,
     MAX_POSITIONS_PER_SYMBOL,
     MIN_ENTRY_DISTANCE_PCT,
+    MIN_CONFIDENCE_SELL,
+    MIN_SETUP_SCORE_FOR_LLM,
 )
 from src.application.market_data import get_market_data
-from src.application.llm_analyst import analyze
+from src.application.llm_analyst import analyze_bot, build_context
+from src.application.tools import process_bot_actions
 from src.application.risk_manager import (
     load_state,
     check_daily_loss_limit,
-    execute_trade,
-    monitor_positions,
+    execute_buy,
+    execute_sell_by_id,
     open_positions,
     daily_loss_usdt,
     session_stats,
 )
-from src.application.llm_analyst import build_context
 from src.infra.supabase.repository import get_trades_since, save_llm_log
 
 log = setup_logging()
@@ -35,9 +42,7 @@ log = setup_logging()
 # ── Resumo diario ─────────────────────────────────────────────────────────────
 
 def log_daily_summary():
-    """Loga um resumo diario das operacoes com dados de mercado -- agendado para meia-noite."""
-    usdt = get_balance("USDT")
-
+    usdt  = get_balance("USDT")
     total = session_stats.trades_total
     wins  = session_stats.trades_win
     wr    = (wins / total * 100) if total > 0 else 0
@@ -54,7 +59,6 @@ def log_daily_summary():
     total_lotes = sum(len(v) for v in open_positions.values())
     log.info(f"  Posicoes abertas:   {total_lotes} lote(s) em {len(open_positions)} par(es)")
 
-    # Dados de mercado por simbolo
     for symbol in SYMBOLS:
         data = get_market_data(symbol)
         if not data:
@@ -67,46 +71,38 @@ def log_daily_summary():
         else:
             ema_trend = "neutral"
 
-        bb_pos = (
-            (data.price - data.bb_lower) / (data.bb_upper - data.bb_lower) * 100
-            if data.bb_upper != data.bb_lower else 50.0
-        )
-
         log.info(f"  [{symbol}] Mercado:")
         log.info(f"    Preco:            ${data.price:.4f}")
-        log.info(f"    RSI 1h:           {data.rsi_1h:.1f}")
-        log.info(f"    Fear & Greed:     {data.fear_greed}")
+        log.info(f"    RSI 1h:           {data.rsi_1h:.1f} ({data.rsi_direction})")
+        log.info(f"    Fear & Greed:     {data.fear_greed} ({data.fear_greed_label})")
+        log.info(f"    MACD:             linha {data.macd_line:.2f} | sinal {data.macd_signal:.2f} | hist {data.macd_histogram:.2f}")
         log.info(f"    Tendencia EMA:    {ema_trend} (EMA20:{data.ema20:.0f} EMA50:{data.ema50:.0f} EMA200:{data.ema200:.0f})")
-        log.info(f"    Bollinger:        lower ${data.bb_lower:.0f} / upper ${data.bb_upper:.0f} | pos: {bb_pos:.0f}%")
-        log.info(f"    ATR:              {data.atr:.2f}")
-        log.info(f"    Volume 24h:       {data.volume_24h:.2f} BTC | media 5h: {data.avg_volume_5h:.2f} BTC")
+        log.info(f"    Bollinger:        lower ${data.bb_lower:.0f} / upper ${data.bb_upper:.0f} | %B: {data.bb_pct_b:.2f} | width: {data.bb_width:.4f}")
+        log.info(f"    Variacao:         1h {data.change_pct_1h:+.2f}% | 4h {data.change_pct_4h:+.2f}% | 24h {data.change_pct_24h:+.2f}%")
+        log.info(f"    Volume ratio:     {data.volume_ratio:.2f}x da media")
         log.info(f"    Range 24h:        ${data.range_low_24h:.0f} - ${data.range_high_24h:.0f} | pos: {data.range_position_24h * 100:.0f}%")
         log.info(f"    Range 7d:         ${data.range_low_7d:.0f} - ${data.range_high_7d:.0f} | pos: {data.range_position_7d * 100:.0f}%")
-        log.info(f"    Range 30d:        ${data.range_low_30d:.0f} - ${data.range_high_30d:.0f}")
 
-        # Posicoes abertas do simbolo
         plist = open_positions.get(symbol, [])
-        if plist:
-            for pos in plist:
-                change = (data.price - pos.entry_price) / pos.entry_price * 100
-                pnl_est = (data.price - pos.entry_price) * pos.qty
-                log.info(
-                    f"    Posicao: entrada ${pos.entry_price:.4f} | "
-                    f"atual ${data.price:.4f} | {change:+.2f}% | "
-                    f"PnL est.: ${pnl_est:+.4f} | "
-                    f"SL: ${pos.sl:.4f} | TP: ${pos.tp:.4f}"
-                )
+        for pos in plist:
+            change  = (data.price - pos.entry_price) / pos.entry_price * 100
+            pnl_est = (data.price - pos.entry_price) * pos.qty
+            log.info(
+                f"    Posicao: entrada ${pos.entry_price:.4f} | "
+                f"atual ${data.price:.4f} | {change:+.2f}% | "
+                f"PnL est.: ${pnl_est:+.4f} | "
+                f"SL: ${pos.sl:.4f} | TP: ${pos.tp:.4f} | "
+                f"holds: {pos.tp_hold_count}"
+            )
 
     log.info("=" * 55)
 
 
 def log_weekly_pnl():
-    """Relatorio semanal de lucro e perda por moeda -- agendado para domingo a meia-noite."""
-    now  = datetime.now(timezone.utc)
+    now        = datetime.now(timezone.utc)
     week_start = now - timedelta(days=7)
     since_iso  = week_start.strftime("%Y-%m-%dT%H:%M:%S+00:00")
-
-    trades = get_trades_since(since_iso)
+    trades     = get_trades_since(since_iso)
 
     log.info("=" * 55)
     log.info("RELATORIO SEMANAL DE P&L")
@@ -117,20 +113,17 @@ def log_weekly_pnl():
         log.info("=" * 55)
         return
 
-    # Agrupa por simbolo
     by_symbol: dict[str, list[dict]] = {}
     for t in trades:
-        sym = t["symbol"]
-        by_symbol.setdefault(sym, []).append(t)
+        by_symbol.setdefault(t["symbol"], []).append(t)
 
     total_pnl_global = 0.0
 
     for sym, sym_trades in by_symbol.items():
-        wins   = [t for t in sym_trades if t["pnl"] > 0]
-        losses = [t for t in sym_trades if t["pnl"] <= 0]
+        wins      = [t for t in sym_trades if t["pnl"] > 0]
+        losses    = [t for t in sym_trades if t["pnl"] <= 0]
         total_pnl = sum(t["pnl"] for t in sym_trades)
         total_pnl_global += total_pnl
-
         wr = len(wins) / len(sym_trades) * 100 if sym_trades else 0
 
         log.info(f"\n  [{sym}]")
@@ -141,7 +134,6 @@ def log_weekly_pnl():
         if wins:
             best = max(wins, key=lambda t: t["pnl"])
             log.info(f"    Melhor trade:     ${best['pnl']:+.4f} ({best['action']} @ {best['created_at'][:10]})")
-
         if losses:
             worst = min(losses, key=lambda t: t["pnl"])
             log.info(f"    Pior trade:       ${worst['pnl']:+.4f} ({worst['action']} @ {worst['created_at'][:10]})")
@@ -162,8 +154,7 @@ def log_weekly_pnl():
 
 def run_cycle():
     log.info("-" * 55)
-    log.info(
-        f"Ciclo: {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.000Z')}")
+    log.info(f"Ciclo: {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.000Z')}")
     log.info(
         f"Saldo USDT: ${get_balance('USDT'):.2f} | "
         f"Perda hoje: ${daily_loss_usdt:.2f}/${MAX_DAILY_LOSS_USDT:.2f} | "
@@ -171,51 +162,69 @@ def run_cycle():
         f"PnL: ${session_stats.pnl_total:+.4f}"
     )
 
-    daily_limit_hit = check_daily_loss_limit()
-
     for symbol in SYMBOLS:
         data = get_market_data(symbol)
-
         if not data:
             continue
 
         price = data.price
-
         plist = open_positions.get(symbol, [])
 
         for pos in plist:
             change = (price - pos.entry_price) / pos.entry_price * 100
-
             log.info(
                 f"[{symbol}] Posicao aberta | "
-                f"entrada: ${pos.entry_price:.4f} | atual: ${price:.4f} | {change:+.2f}%"
+                f"entrada: ${pos.entry_price:.4f} | atual: ${price:.4f} | {change:+.2f}% | "
+                f"holds: {pos.tp_hold_count}"
             )
 
         log.info(
-            f"[{symbol}] Analisando... (RSI: {data.rsi_1h} | F&G: {data.fear_greed})")
-
-        context = build_context(data, open_positions)
-        signal  = analyze(data, open_positions)
-
-        llm_response = {
-            "action":        signal.action,
-            "confidence":    signal.confidence,
-            "sl_percentage": signal.sl_percentage,
-            "tp_percentage": signal.tp_percentage,
-            "reason":        signal.reason,
-        }
-        llm_log_id = save_llm_log(symbol, context, llm_response)
-
-        log.info(
-            f"[{symbol}] Preco: ${price:.4f} | "
-            f"Acao: {signal.action} | "
-            f"Confianca: {signal.confidence:.0%} | "
-            f"SL: {signal.sl_percentage}% | TP: {signal.tp_percentage}%"
+            f"[{symbol}] Analisando... "
+            f"(RSI: {data.rsi_1h} {data.rsi_direction} | "
+            f"F&G: {data.fear_greed} {data.fear_greed_label} | "
+            f"MACD hist: {data.macd_histogram:+.2f} | "
+            f"ADX: {data.adx:.1f} [{data.market_regime}] | "
+            f"setup: {data.setup_score}/100)"
         )
-        log.info(f"[{symbol}] LLM: {signal.reason}")
 
-        if not daily_limit_hit:
-            execute_trade(symbol, signal, price, llm_log_id=llm_log_id)
+        # Pula consulta ao LLM se o setup tecnico estiver abaixo do limiar
+        if data.setup_score < MIN_SETUP_SCORE_FOR_LLM and not open_positions.get(symbol):
+            log.info(
+                f"[{symbol}] Setup score {data.setup_score}/100 abaixo do minimo "
+                f"({MIN_SETUP_SCORE_FOR_LLM}) e sem posicoes abertas -- pulando LLM"
+            )
+            continue
+
+        # Consulta LLM via tools
+        actions = analyze_bot(data, open_positions)
+
+        # Salva log LLM (mesmo que nao haja actions)
+        context = build_context(data, open_positions)
+
+        tool_called = actions[0]["tool"] if actions else None
+        
+        llm_log_id = save_llm_log(
+            symbol=      symbol,
+            context=     context,
+            response=    {"actions": actions},
+            process=     "bot",
+            tool_called= tool_called,
+        )
+
+        if check_daily_loss_limit():
+            log.info(f"[{symbol}] Limite diario atingido — ignorando acoes do LLM")
+            continue
+
+        # Despacha acoes do LLM para as funcoes de execucao via tools.py
+        process_bot_actions(
+            actions=        actions,
+            symbol=         symbol,
+            price=          price,
+            llm_log_id=     llm_log_id,
+            execute_buy_fn= execute_buy,
+            execute_sell_fn=execute_sell_by_id,
+            min_conf_sell=  MIN_CONFIDENCE_SELL,
+        )
 
     log.info("Ciclo concluido.")
 
@@ -224,11 +233,10 @@ def run_cycle():
 
 if __name__ == "__main__":
     log.info("=" * 55)
-    log.info(
-        "---Crypto Bot iniciado -- OpenRouter + Binance TESTNET by lluizllucas---")
+    log.info("Crypto Bot iniciado -- OpenRouter + Binance TESTNET")
     log.info(f"  Simbolos:              {', '.join(SYMBOLS)}")
-    log.info(f"  Analise:               a cada 15 min")
-    log.info(f"  Monitor SL/TP:         a cada 5 min")
+    log.info(f"  Analise:               a cada 15 min (bot.py)")
+    log.info(f"  Monitor SL/TP:         a cada 5 min (check_sl_tp.py)")
     log.info(f"  USDT por trade:        ${TRADE_USDT}")
     log.info(f"  Max lotes/par:         {MAX_POSITIONS_PER_SYMBOL}")
     log.info(f"  Dist. min. entrada:    {MIN_ENTRY_DISTANCE_PCT}%")
@@ -239,12 +247,11 @@ if __name__ == "__main__":
     load_state()
 
     try:
-        monitor_positions()
         run_cycle()
         log_daily_summary()
         log_weekly_pnl()
     except Exception:
-        log.exception("Erro na execucao unica do bot")
+        log.exception("Erro na execucao do bot")
         sys.exit(1)
 
     sys.exit(0)
