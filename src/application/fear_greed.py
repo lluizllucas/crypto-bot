@@ -9,9 +9,8 @@ Escala:
 """
 
 import logging
+log = logging.getLogger("bot")
 import requests
-
-log = logging.getLogger(__name__)
 
 _URL = "https://api.alternative.me/fng/"
 

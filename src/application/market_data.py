@@ -16,7 +16,8 @@ from src.application.fear_greed import get_fear_greed
 
 from src.infra.binance.client import get_klines, get_ticker
 
-log = logging.getLogger(__name__)
+
+log = logging.getLogger("bot")
 
 
 def _range_position(price: float, low: float, high: float) -> float:

@@ -8,7 +8,7 @@ Schemas das tools e processamento das respostas estao em application/tools.py.
 
 import json
 import logging
-from datetime import datetime, timezone
+log = logging.getLogger("bot")
 
 from openai import OpenAI
 
@@ -17,7 +17,6 @@ from src.domain.models import MarketData, Position
 from src.application.tools import TOOLS_MONITOR, TOOLS_BOT, TOOLS_QUERY, parse_tool_calls, dispatch_query_tool
 from src.infra.supabase.repository import get_recent_llm_decisions, get_recent_performance
 
-log = logging.getLogger(__name__)
 
 _llm = OpenAI(
     base_url="https://openrouter.ai/api/v1",

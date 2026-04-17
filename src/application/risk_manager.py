@@ -4,6 +4,7 @@ early exit, limite diario e execucao de ordens.
 """
 
 import logging
+log = logging.getLogger("bot")
 from datetime import datetime, timezone
 
 from binance.exceptions import BinanceAPIException
@@ -23,6 +24,7 @@ from src.config import (
 )
 
 from src.domain.models import Position, SessionStats
+
 
 from src.application.notifier import discord_notify
 from src.application.tools import process_monitor_actions
@@ -48,9 +50,9 @@ from src.infra.supabase.repository import (
     save_llm_log,
 )
 
-log = logging.getLogger(__name__)
 
-# Posicoes abertas em memoria { "BTCUSDT": [Position, ...] }
+# Posicoes abertas em memoria -- carregadas do Supabase na inicializacao
+# { "BTCUSDT": [Position, ...] }
 open_positions: dict[str, list[Position]] = {}
 
 # Perda acumulada no dia (restaurada do banco na inicializacao)

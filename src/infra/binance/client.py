@@ -8,12 +8,13 @@ Dois clientes separados:
 
 import math
 import logging
+log = logging.getLogger("bot")
+
 
 from binance.client import Client
 
 from src.config import BINANCE_TESTNET_API_KEY, BINANCE_TESTNET_SECRET_KEY, BINANCE_API_KEY, BINANCE_SECRET_KEY
 
-log = logging.getLogger(__name__)
 
 # Mainnet -- dados de mercado reais (candles, ticker, preco)
 # Nao requer autenticacao pois endpoints de mercado sao publicos
@@ -33,7 +34,7 @@ trade_client.API_URL = "https://testnet.binance.vision/api"
 def get_balance(asset: str) -> float:
     """Retorna o saldo disponivel de um asset na testnet."""
     try:
-        balance = market_client.get_asset_balance(asset=asset)
+        balance = trade_client.get_asset_balance(asset=asset)
         return float(balance["free"]) if balance else 0.0
     except Exception as e:
         log.error(f"Erro ao buscar saldo de {asset}: {e}")
