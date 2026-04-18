@@ -186,7 +186,8 @@ Regras de confianca para hold_position:
 - 3a tentativa em diante: confianca minima {conf_3}
 
 Se confianca insuficiente para hold, prefira sell_position.
-Sempre explique seu raciocinio em texto, mesmo quando nao acionar nenhuma tool.\
+IMPORTANTE: Voce DEVE sempre escrever um paragrafo explicando sua analise e decisao, 
+independentemente de acionar ou nao uma tool. Sem texto de analise a resposta e invalida.\\
 """
 
 _SYSTEM_BOT = """\
@@ -214,6 +215,8 @@ Regras para open_position:
 - confianca minima: {min_confidence}
 
 Em caso de duvida, nao abra posicao — mas sempre explique seu raciocinio em texto.\
+IMPORTANTE: Voce DEVE sempre escrever um paragrafo explicando sua analise e decisao, 
+independentemente de acionar ou nao uma tool. Sem texto de analise a resposta e invalida.\\
 """
 
 
@@ -246,7 +249,7 @@ def _call_llm(system: str, context: dict, action_tools: list, process: str) -> t
                     system=[{"text": system}],
                     messages=msgs,
                     toolConfig={"tools": bedrock_tools},
-                    inferenceConfig={"maxTokens": 1024, "temperature": 0.3},
+                    inferenceConfig={"maxTokens": 2048, "temperature": 0.3},
                 )
 
                 output_msg  = response["output"]["message"]
