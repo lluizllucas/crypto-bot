@@ -8,8 +8,8 @@ load_dotenv()
 #################### BEDROCK ######################
 ####################################################
 
-BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-haiku-4-5-20251001-v1:0")
-BEDROCK_REGION   = os.getenv("BEDROCK_REGION",   "sa-east-1")
+BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0")
+BEDROCK_REGION   = os.getenv("BEDROCK_REGION",   "us-east-1")
 
 
 MIN_CONFIDENCE = 0.75
