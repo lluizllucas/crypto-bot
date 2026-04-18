@@ -5,10 +5,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ####################################################
-################### OPEN ROUTER ####################
+#################### BEDROCK ######################
 ####################################################
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0")
+BEDROCK_REGION   = os.getenv("BEDROCK_REGION",   "sa-east-1")
 
 
 MIN_CONFIDENCE = 0.75
