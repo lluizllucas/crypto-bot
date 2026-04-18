@@ -25,7 +25,7 @@ _llm = OpenAI(
     api_key=OPENROUTER_API_KEY,
 )
 
-_LLM_MODEL = "google/gemini-2.0-flash-exp:free"
+_LLM_MODEL = "google/gemini-2.5-flash-preview:free"
 
 
 # ---------------------------------------------------------------------------
