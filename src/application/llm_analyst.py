@@ -27,20 +27,17 @@ _MAX_QUERY_ROUNDS = 3
 
 # ---------------------------------------------------------------------------
 # Conversao de schemas OpenAI → Bedrock
-# Bedrock usa {"name", "description", "input_schema"} em vez de
-# {"type": "function", "function": {"name", "description", "parameters"}}
 # ---------------------------------------------------------------------------
 
 def _to_bedrock_tools(openai_tools: list) -> list:
-    """Converte lista de tools no formato OpenAI para o formato Bedrock."""
     result = []
     for t in openai_tools:
         fn = t["function"]
         result.append({
             "toolSpec": {
-                "name":         fn["name"],
-                "description":  fn.get("description", ""),
-                "inputSchema":  {"json": fn["parameters"]},
+                "name":        fn["name"],
+                "description": fn.get("description", ""),
+                "inputSchema": {"json": fn["parameters"]},
             }
         })
     return result
@@ -66,8 +63,6 @@ def _sanitize(text: str) -> str:
 # ---------------------------------------------------------------------------
 
 def build_context(data: MarketData, open_positions: dict | None = None) -> dict:
-    """Monta o contexto JSON estruturado para envio a LLM."""
-
     if data.ema20 > data.ema50 > data.ema200:
         ema_trend = "bullish"
     elif data.ema20 < data.ema50 < data.ema200:
@@ -105,7 +100,6 @@ def build_context(data: MarketData, open_positions: dict | None = None) -> dict:
     return {
         "symbol": data.symbol,
         "price":  data.price,
-
         "indicators": {
             "rsi_1h":         data.rsi_1h,
             "rsi_direction":  data.rsi_direction,
@@ -124,7 +118,6 @@ def build_context(data: MarketData, open_positions: dict | None = None) -> dict:
             "macd_signal":    data.macd_signal,
             "macd_histogram": data.macd_histogram,
         },
-
         "price_action": {
             "change_pct_1h":  data.change_pct_1h,
             "change_pct_4h":  data.change_pct_4h,
@@ -134,13 +127,11 @@ def build_context(data: MarketData, open_positions: dict | None = None) -> dict:
                 for c in data.recent_candles
             ],
         },
-
         "volume": {
             "volume_24h":    data.volume_24h,
             "avg_volume_5h": data.avg_volume_5h,
             "volume_ratio":  data.volume_ratio,
         },
-
         "ranges": {
             "range_position_24h": data.range_position_24h,
             "range_high_24h":     data.range_high_24h,
@@ -151,12 +142,10 @@ def build_context(data: MarketData, open_positions: dict | None = None) -> dict:
             "range_high_30d":     data.range_high_30d,
             "range_low_30d":      data.range_low_30d,
         },
-
         "sentiment": {
             "fear_greed":       data.fear_greed,
             "fear_greed_label": data.fear_greed_label,
         },
-
         "market_regime": {
             "adx":         data.adx,
             "plus_di":     data.plus_di,
@@ -164,9 +153,7 @@ def build_context(data: MarketData, open_positions: dict | None = None) -> dict:
             "regime":      data.market_regime,
             "setup_score": data.setup_score,
         },
-
-        "open_positions": positions_ctx,
-
+        "open_positions":     positions_ctx,
         "llm_memory":         get_recent_llm_decisions(data.symbol, limit=5),
         "recent_performance": get_recent_performance(data.symbol, limit=10),
     }
@@ -186,20 +173,20 @@ Contexto disponivel:
 - "market_regime": regime atual (trending/ranging) via ADX + DI+ / DI- + setup_score
 
 Use llm_memory para evitar repeticao de erros recentes e calibrar sua decisao.
-Use recent_performance para ajustar conservadorismo: se win_rate < 40% ou pnl_avg negativo, seja mais cauteloso.
-Use market_regime: em mercado ranging (ADX < 20) prefira realizar o lucro; em trending (ADX >= 25) hold e mais justificavel.
+Use recent_performance: se win_rate < 40% ou pnl_avg negativo, seja mais cauteloso.
+Use market_regime: em ranging (ADX < 20) prefira realizar lucro; em trending (ADX >= 25) hold e justificavel.
 
 Regras de decisao:
-- Se o TP foi atingido: chame sell_position (realizar lucro) ou hold_position (segurar se alta continua)
-- Se o preco esta proximo do SL (80% do caminho): chame early_exit se acreditar em queda iminente
+- TP atingido: chame sell_position ou hold_position
+- Preco proximo do SL (80%): chame early_exit se acreditar em queda iminente
 
 Regras de confianca para hold_position:
-- 1a tentativa de hold: confianca minima {conf_1}
+- 1a tentativa: confianca minima {conf_1}
 - 2a tentativa: confianca minima {conf_2}
 - 3a tentativa em diante: confianca minima {conf_3}
 
-Se a confianca nao atingir o minimo exigido para hold, prefira sell_position.
-Se nao houver sinal claro, nao chame nenhuma tool.\
+Se confianca insuficiente para hold, prefira sell_position.
+Sempre explique seu raciocinio em texto, mesmo quando nao acionar nenhuma tool.\
 """
 
 _SYSTEM_BOT = """\
@@ -211,22 +198,22 @@ Contexto disponivel:
 - "recent_performance": resumo das ultimas 10 operacoes fechadas (win_rate, pnl_avg, best, worst)
 - "market_regime": regime atual via ADX (trending/ranging) + setup_score pre-calculado (0-100)
 
-Use llm_memory para evitar entrar em sequencias de erros ou abrir posicoes muito proximas de decisoes recentes.
-Use recent_performance para calibrar confianca: se win_rate < 40%, eleve o limiar de confianca exigido.
-Use market_regime: setup_score < 40 indica mercado sem setup claro — evite abrir posicoes.
-Em mercado ranging (ADX < 20), seja conservador com novas entradas; em trending (ADX >= 25), setups tecnicos tem maior probabilidade.
+Use llm_memory para evitar sequencias de erros ou entradas muito proximas de decisoes recentes.
+Use recent_performance: se win_rate < 40%, eleve o limiar de confianca exigido.
+Use market_regime: setup_score < 40 indica sem setup claro — evite abrir posicoes.
+Em ranging (ADX < 20), conservador com novas entradas; em trending (ADX >= 25), setups tem maior probabilidade.
 
 Acoes disponiveis:
-- open_position: apenas se houver setup claro de entrada (RSI, EMA, volume e momentum alinhados)
-- sell_position: se uma posicao aberta deve ser encerrada por deterioracao do cenario
-- Nao chame nenhuma tool se o mercado estiver ambiguo ou sem setup definido
+- open_position: apenas se houver setup claro (RSI, EMA, volume e momentum alinhados)
+- sell_position: se posicao aberta deve ser encerrada por deterioracao do cenario
+- Nao chame nenhuma tool se mercado ambiguo ou sem setup definido
 
-Regras de risco para open_position:
-- sl_percentage: use o ATR como referencia (ATR / preco * 100). Minimo 1.0%, maximo 5.0%
-- tp_percentage: relacao risco/retorno minima de 1:2 em relacao ao sl_percentage
-- confianca minima para executar: {min_confidence}
+Regras para open_position:
+- sl_percentage: ATR / preco * 100. Minimo 1.0%, maximo 5.0%
+- tp_percentage: risco/retorno minimo 1:2 em relacao ao sl_percentage
+- confianca minima: {min_confidence}
 
-Em caso de duvida, nao abra posicao.\
+Em caso de duvida, nao abra posicao — mas sempre explique seu raciocinio em texto.\
 """
 
 
@@ -234,26 +221,19 @@ Em caso de duvida, nao abra posicao.\
 # Chamada ao Bedrock com agentic reasoning loop
 # ---------------------------------------------------------------------------
 
-def _call_llm(system: str, context: dict, action_tools: list, process: str) -> list:
+def _call_llm(system: str, context: dict, action_tools: list, process: str) -> tuple[list, str]:
     """
-    Chama o Bedrock (Claude Haiku) com contexto, tools de consulta e tools de acao.
-
-    Loop de agentic reasoning:
-    1. LLM recebe contexto + todas as tools (consulta + acao)
-    2. Se chamar uma tool de consulta → executa, adiciona resultado, repete
-    3. Se chamar uma tool de acao → retorna as tool_calls de acao
-    4. Se nao chamar nenhuma tool → retorna lista vazia
-    5. Maximo de _MAX_QUERY_ROUNDS rodadas de consulta
-
-    Retorna lista de tool_calls de acao normalizados como objetos duck-typed
-    compatíveis com parse_tool_calls (que espera tc.function.name e tc.function.arguments).
+    Chama o Bedrock com contexto e tools.
+    Retorna tupla (tool_calls, reasoning):
+    - tool_calls: acoes duck-typed para parse_tool_calls (vazia se HOLD)
+    - reasoning:  texto explicativo do LLM (sempre presente, especialmente no HOLD)
     """
     all_openai_tools = action_tools + TOOLS_QUERY
     bedrock_tools    = _to_bedrock_tools(all_openai_tools)
     query_names      = {t["function"]["name"] for t in TOOLS_QUERY}
 
     user_content = f"Contexto de mercado atual:\n{json.dumps(context, indent=2, ensure_ascii=False)}"
-    messages = [{"role": "user", "content": [{"text": user_content}]}]
+    messages     = [{"role": "user", "content": [{"text": user_content}]}]
 
     for attempt in range(1, 4):
         query_rounds = 0
@@ -272,28 +252,34 @@ def _call_llm(system: str, context: dict, action_tools: list, process: str) -> l
                 output_msg  = response["output"]["message"]
                 stop_reason = response["stopReason"]
 
-                # Sem tool use → sem acao
+                # Extrai texto de reasoning presente em qualquer stopReason
+                text_blocks = [b["text"] for b in output_msg["content"] if b.get("type") == "text"]
+                reasoning   = " ".join(text_blocks).strip()
+
+                # Sem tool use → loga reasoning e encerra
                 if stop_reason != "tool_use":
-                    return []
+                    if reasoning:
+                        log.info(f"[{process}] LLM HOLD — {reasoning[:400]}")
+                    return [], reasoning
 
-                # Separa tool uses de consulta e de acao
-                tool_uses    = [b for b in output_msg["content"] if b.get("type") == "toolUse"]
-                query_uses   = [u for u in tool_uses if u["name"] in query_names]
-                action_uses  = [u for u in tool_uses if u["name"] not in query_names]
+                # Separa consulta de acao
+                tool_uses   = [b for b in output_msg["content"] if b.get("type") == "toolUse"]
+                query_uses  = [u for u in tool_uses if u["name"] in query_names]
+                action_uses = [u for u in tool_uses if u["name"] not in query_names]
 
-                # Tem acao → converte para duck-type compatível com parse_tool_calls e retorna
+                # Tem acao → retorna imediatamente
                 if action_uses:
-                    return [_BedrockToolCall(u) for u in action_uses]
+                    return [_BedrockToolCall(u) for u in action_uses], reasoning
 
-                # Só consultas mas atingiu limite → encerra sem acao
+                # Só consultas mas atingiu limite
                 if query_rounds >= _MAX_QUERY_ROUNDS:
                     log.warning(
                         f"[{process}] Limite de {_MAX_QUERY_ROUNDS} rodadas de consulta atingido "
                         f"— encerrando sem acao"
                     )
-                    return []
+                    return [], reasoning
 
-                # Executa tools de consulta e adiciona resultado ao historico
+                # Executa tools de consulta
                 msgs.append({"role": "assistant", "content": output_msg["content"]})
 
                 tool_results = []
@@ -301,13 +287,12 @@ def _call_llm(system: str, context: dict, action_tools: list, process: str) -> l
                     result = dispatch_query_tool(u["name"], u["input"])
                     log.info(
                         f"[{process}] Tool de consulta: {u['name']} | "
-                        f"args: {u['input']} | "
-                        f"result keys: {list(result.keys())}"
+                        f"args: {u['input']} | result keys: {list(result.keys())}"
                     )
                     tool_results.append({
-                        "type":        "toolResult",
-                        "toolUseId":   u["toolUseId"],
-                        "content":     json.dumps(result, ensure_ascii=False),
+                        "type":      "toolResult",
+                        "toolUseId": u["toolUseId"],
+                        "content":   json.dumps(result, ensure_ascii=False),
                     })
 
                 msgs.append({"role": "user", "content": tool_results})
@@ -319,15 +304,15 @@ def _call_llm(system: str, context: dict, action_tools: list, process: str) -> l
             else:
                 log.error(f"[{process}] Erro apos 3 tentativas: {_sanitize(str(e))}")
 
-    return []
+    return [], ""
 
 
 # ---------------------------------------------------------------------------
-# Duck-type para compatibilidade com parse_tool_calls (espera tc.function.name/arguments)
+# Duck-type para compatibilidade com parse_tool_calls
 # ---------------------------------------------------------------------------
 
 class _BedrockToolCall:
-    """Adapta o formato de tool use do Bedrock para a interface esperada por parse_tool_calls."""
+    """Adapta tool use do Bedrock para a interface esperada por parse_tool_calls."""
 
     class _Function:
         def __init__(self, name: str, arguments: str):
@@ -342,7 +327,7 @@ class _BedrockToolCall:
 
 
 # ---------------------------------------------------------------------------
-# Funcoes publicas
+# Funcoes publicas — retornam tupla (actions, reasoning)
 # ---------------------------------------------------------------------------
 
 def analyze_monitor(
@@ -350,10 +335,10 @@ def analyze_monitor(
     open_positions:      dict,
     triggered_positions: list[Position],
     trigger_type:        str,
-) -> list[dict]:
+) -> tuple[list[dict], str]:
     """
     Chamado pelo monitor (check_sl_tp) quando TP e atingido ou preco esta proximo do SL.
-    Retorna lista de acoes normalizadas via parse_tool_calls.
+    Retorna (actions, reasoning).
     """
     conf   = TP_HOLD_MIN_CONFIDENCE
     system = _SYSTEM_MONITOR.format(
@@ -366,19 +351,19 @@ def analyze_monitor(
     context["trigger_type"]        = trigger_type
     context["triggered_positions"] = [p.db_id for p in triggered_positions]
 
-    tool_calls = _call_llm(system, context, TOOLS_MONITOR, "monitor")
-    return parse_tool_calls(tool_calls, "monitor")
+    tool_calls, reasoning = _call_llm(system, context, TOOLS_MONITOR, "monitor")
+    return parse_tool_calls(tool_calls, "monitor"), reasoning
 
 
 def analyze_bot(
     data:           MarketData,
     open_positions: dict,
-) -> list[dict]:
+) -> tuple[list[dict], str]:
     """
     Chamado pelo ciclo principal (analysis_llm.py) para decisoes estrategicas.
-    Retorna lista de acoes normalizadas via parse_tool_calls.
+    Retorna (actions, reasoning).
     """
-    system     = _SYSTEM_BOT.format(min_confidence=MIN_CONFIDENCE)
-    context    = build_context(data, open_positions)
-    tool_calls = _call_llm(system, context, TOOLS_BOT, "bot")
-    return parse_tool_calls(tool_calls, "bot")
+    system                = _SYSTEM_BOT.format(min_confidence=MIN_CONFIDENCE)
+    context               = build_context(data, open_positions)
+    tool_calls, reasoning = _call_llm(system, context, TOOLS_BOT, "bot")
+    return parse_tool_calls(tool_calls, "bot"), reasoning

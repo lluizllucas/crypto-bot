@@ -559,25 +559,23 @@ def _handle_tp(symbol, idx, pos, price, llm_analyze_fn, market_data_fn):
         close_position_at_index(symbol, idx, price, "TAKE-PROFIT")
         return
 
-    actions = llm_analyze_fn(
+    actions, reasoning = llm_analyze_fn(
         data=data,
         open_positions=open_positions,
         triggered_positions=[pos],
         trigger_type="TP",
     )
 
-    exit_llm_log_id = None
-    if actions:
-        from src.application.llm_analyst import build_context
-        context = build_context(data, open_positions)
-        exit_llm_log_id = save_llm_log(
-            symbol=      symbol,
-            context=     context,
-            response=    {"actions": actions},
-            process=     "monitor",
-            tool_called= actions[0]["tool"],
-            position_id= pos.db_id or None,
-        )
+    from src.application.llm_analyst import build_context
+    context         = build_context(data, open_positions)
+    exit_llm_log_id = save_llm_log(
+        symbol=      symbol,
+        context=     context,
+        response=    {"actions": actions, "reasoning": reasoning},
+        process=     "monitor",
+        tool_called= actions[0]["tool"] if actions else None,
+        position_id= pos.db_id or None,
+    )
 
     acted = process_monitor_actions(
         actions=          actions,
@@ -606,25 +604,23 @@ def _handle_early_exit(symbol, idx, pos, price, llm_analyze_fn, market_data_fn):
     if data is None:
         return
 
-    actions = llm_analyze_fn(
+    actions, reasoning = llm_analyze_fn(
         data=data,
         open_positions=open_positions,
         triggered_positions=[pos],
         trigger_type="EARLY_EXIT",
     )
 
-    exit_llm_log_id = None
-    if actions:
-        from src.application.llm_analyst import build_context
-        context = build_context(data, open_positions)
-        exit_llm_log_id = save_llm_log(
-            symbol=      symbol,
-            context=     context,
-            response=    {"actions": actions},
-            process=     "monitor",
-            tool_called= actions[0]["tool"],
-            position_id= pos.db_id or None,
-        )
+    from src.application.llm_analyst import build_context
+    context         = build_context(data, open_positions)
+    exit_llm_log_id = save_llm_log(
+        symbol=      symbol,
+        context=     context,
+        response=    {"actions": actions, "reasoning": reasoning},
+        process=     "monitor",
+        tool_called= actions[0]["tool"] if actions else None,
+        position_id= pos.db_id or None,
+    )
 
     process_monitor_actions(
         actions=          actions,

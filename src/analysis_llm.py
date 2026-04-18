@@ -1,8 +1,6 @@
 """
 Execucao efemera da analise LLM.
 Este script roda uma unica vez e encerra, ideal para EventBridge + ECS Fargate.
-
-Mesma logica do ciclo LLM em bot.py: analyze_bot + process_bot_actions (tools).
 """
 
 import sys
@@ -73,32 +71,38 @@ def main() -> int:
             f"(RSI: {data.rsi_1h} | F&G: {data.fear_greed} | setup: {data.setup_score}/100)"
         )
 
-        actions = analyze_bot(data, open_positions)
+        # analyze_bot agora retorna (actions, reasoning)
+        actions, reasoning = analyze_bot(data, open_positions)
 
-        context = build_context(data, open_positions)
-
+        context     = build_context(data, open_positions)
         tool_called = actions[0]["tool"] if actions else None
 
         llm_log_id = save_llm_log(
-            symbol=symbol,
-            context=context,
-            response={"actions": actions},
-            process="analysis_llm",
-            tool_called=tool_called,
+            symbol=      symbol,
+            context=     context,
+            response=    {"actions": actions, "reasoning": reasoning},
+            process=     "bot",
+            tool_called= tool_called,
         )
+
+        # Loga resumo no CloudWatch
+        if tool_called:
+            log.info(f"[{symbol}] LLM decisao: {tool_called} | {actions[0]['args'].get('reason', '')}")
+        else:
+            log.info(f"[{symbol}] LLM HOLD — salvo no Supabase (llm_log_id: {llm_log_id})")
 
         if check_daily_loss_limit():
             log.info(f"[{symbol}] Limite diario atingido — ignorando acoes do LLM")
             continue
 
         process_bot_actions(
-            actions=actions,
-            symbol=symbol,
-            price=price,
-            llm_log_id=llm_log_id,
-            execute_buy_fn=execute_buy,
+            actions=        actions,
+            symbol=         symbol,
+            price=          price,
+            llm_log_id=     llm_log_id,
+            execute_buy_fn= execute_buy,
             execute_sell_fn=execute_sell_by_id,
-            min_conf_sell=MIN_CONFIDENCE_SELL,
+            min_conf_sell=  MIN_CONFIDENCE_SELL,
         )
 
     log.info("Execucao LLM concluida.")
