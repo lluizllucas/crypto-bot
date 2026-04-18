@@ -1,26 +1,29 @@
 """
 Execucao efemera da analise LLM.
 Este script roda uma unica vez e encerra, ideal para EventBridge + ECS Fargate.
+
+Mesma logica do ciclo LLM em bot.py: analyze_bot + process_bot_actions (tools).
 """
 
 import sys
 from pathlib import Path
 
-# Raiz do projeto (/app no Docker): necessario se rodar `python src/analysis_llm.py`
 _root = Path(__file__).resolve().parents[1]
 if str(_root) not in sys.path:
     sys.path.insert(0, str(_root))
 
 from datetime import datetime, timezone
 
-from src.config import SYMBOLS, MAX_DAILY_LOSS_USDT
+from src.config import SYMBOLS, MAX_DAILY_LOSS_USDT, MIN_CONFIDENCE_SELL, MIN_SETUP_SCORE_FOR_LLM
 from src.infra import setup_logging, get_balance
 from src.application.market_data import get_market_data
-from src.application.llm_analyst import analyze, build_context
+from src.application.llm_analyst import analyze_bot, build_context
+from src.application.tools import process_bot_actions
 from src.application.risk_manager import (
     load_state,
     check_daily_loss_limit,
-    execute_trade,
+    execute_buy,
+    execute_sell_by_id,
     open_positions,
     daily_loss_usdt,
     session_stats,
@@ -44,7 +47,6 @@ def main() -> int:
     )
 
     load_state()
-    daily_limit_hit = check_daily_loss_limit()
 
     for symbol in SYMBOLS:
         data = get_market_data(symbol)
@@ -59,29 +61,45 @@ def main() -> int:
                 f"entrada: ${pos.entry_price:.4f} | atual: ${price:.4f} | {change:+.2f}%"
             )
 
-        log.info(f"[{symbol}] Analisando... (RSI: {data.rsi_1h} | F&G: {data.fear_greed})")
-        context = build_context(data, open_positions)
-        signal = analyze(data, open_positions)
-
-        llm_response = {
-            "action": signal.action,
-            "confidence": signal.confidence,
-            "sl_percentage": signal.sl_percentage,
-            "tp_percentage": signal.tp_percentage,
-            "reason": signal.reason,
-        }
-        llm_log_id = save_llm_log(symbol, context, llm_response)
+        if data.setup_score < MIN_SETUP_SCORE_FOR_LLM and not open_positions.get(symbol):
+            log.info(
+                f"[{symbol}] Setup score {data.setup_score}/100 abaixo do minimo "
+                f"({MIN_SETUP_SCORE_FOR_LLM}) e sem posicoes abertas -- pulando LLM"
+            )
+            continue
 
         log.info(
-            f"[{symbol}] Preco: ${price:.4f} | "
-            f"Acao: {signal.action} | "
-            f"Confianca: {signal.confidence:.0%} | "
-            f"SL: {signal.sl_percentage}% | TP: {signal.tp_percentage}%"
+            f"[{symbol}] Analisando... "
+            f"(RSI: {data.rsi_1h} | F&G: {data.fear_greed} | setup: {data.setup_score}/100)"
         )
-        log.info(f"[{symbol}] LLM: {signal.reason}")
 
-        if not daily_limit_hit:
-            execute_trade(symbol, signal, price, llm_log_id=llm_log_id)
+        actions = analyze_bot(data, open_positions)
+
+        context = build_context(data, open_positions)
+
+        tool_called = actions[0]["tool"] if actions else None
+
+        llm_log_id = save_llm_log(
+            symbol=symbol,
+            context=context,
+            response={"actions": actions},
+            process="analysis_llm",
+            tool_called=tool_called,
+        )
+
+        if check_daily_loss_limit():
+            log.info(f"[{symbol}] Limite diario atingido — ignorando acoes do LLM")
+            continue
+
+        process_bot_actions(
+            actions=actions,
+            symbol=symbol,
+            price=price,
+            llm_log_id=llm_log_id,
+            execute_buy_fn=execute_buy,
+            execute_sell_fn=execute_sell_by_id,
+            min_conf_sell=MIN_CONFIDENCE_SELL,
+        )
 
     log.info("Execucao LLM concluida.")
     return 0

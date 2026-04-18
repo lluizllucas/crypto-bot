@@ -8,6 +8,8 @@ Schemas das tools e processamento das respostas estao em application/tools.py.
 
 import json
 import logging
+from datetime import datetime, timezone
+
 log = logging.getLogger("bot")
 
 from openai import OpenAI
