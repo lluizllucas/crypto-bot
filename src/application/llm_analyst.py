@@ -253,7 +253,7 @@ def _call_llm(system: str, context: dict, action_tools: list, process: str) -> l
     query_names      = {t["function"]["name"] for t in TOOLS_QUERY}
 
     user_content = f"Contexto de mercado atual:\n{json.dumps(context, indent=2, ensure_ascii=False)}"
-    messages     = [{"role": "user", "content": user_content}]
+    messages = [{"role": "user", "content": [{"text": user_content}]}]
 
     for attempt in range(1, 4):
         query_rounds = 0
