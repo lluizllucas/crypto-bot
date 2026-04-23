@@ -256,7 +256,7 @@ def _call_llm(system: str, context: dict, action_tools: list, process: str) -> t
                 stop_reason = response["stopReason"]
 
                 # Extrai texto de reasoning presente em qualquer stopReason
-                text_blocks = [b["text"] for b in output_msg["content"] if b.get("type") == "text"]
+                text_blocks = [b["text"] for b in output_msg["content"] if "text" in b]
                 reasoning   = " ".join(text_blocks).strip()
 
                 # Sem tool use → loga reasoning e encerra
@@ -266,7 +266,7 @@ def _call_llm(system: str, context: dict, action_tools: list, process: str) -> t
                     return [], reasoning
 
                 # Separa consulta de acao
-                tool_uses   = [b for b in output_msg["content"] if b.get("type") == "toolUse"]
+                tool_uses   = [b["toolUse"] for b in output_msg["content"] if "toolUse" in b]
                 query_uses  = [u for u in tool_uses if u["name"] in query_names]
                 action_uses = [u for u in tool_uses if u["name"] not in query_names]
 
