@@ -12,7 +12,7 @@ BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "us.anthropic.claude-haiku-4-5-
 BEDROCK_REGION   = os.getenv("BEDROCK_REGION",   "us-east-1")
 
 
-MIN_CONFIDENCE = 0.75
+MIN_CONFIDENCE = 0.65
 MIN_CONFIDENCE_SELL = 0.70
 
 ####################################################

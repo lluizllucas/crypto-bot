@@ -173,7 +173,7 @@ Contexto disponivel:
 - "market_regime": regime atual (trending/ranging) via ADX + DI+ / DI- + setup_score
 
 Use llm_memory para evitar repeticao de erros recentes e calibrar sua decisao.
-Use recent_performance: se win_rate < 40% ou pnl_avg negativo, seja mais cauteloso.
+Use recent_performance como contexto historico para entender o ambiente recente.
 Use market_regime: em ranging (ADX < 20) prefira realizar lucro; em trending (ADX >= 25) hold e justificavel.
 
 Regras de decisao:
@@ -186,8 +186,8 @@ Regras de confianca para hold_position:
 - 3a tentativa em diante: confianca minima {conf_3}
 
 Se confianca insuficiente para hold, prefira sell_position.
-IMPORTANTE: Voce DEVE sempre escrever um paragrafo explicando sua analise e decisao, 
-independentemente de acionar ou nao uma tool. Sem texto de analise a resposta e invalida.\\
+
+IMPORTANTE: Voce DEVE sempre escrever um paragrafo explicando sua analise e decisao, independentemente de acionar ou nao uma tool. Sem texto de analise a resposta e invalida.
 """
 
 _SYSTEM_BOT = """\
@@ -200,7 +200,7 @@ Contexto disponivel:
 - "market_regime": regime atual via ADX (trending/ranging) + setup_score pre-calculado (0-100)
 
 Use llm_memory para evitar sequencias de erros ou entradas muito proximas de decisoes recentes.
-Use recent_performance: se win_rate < 40%, eleve o limiar de confianca exigido.
+Use recent_performance como contexto historico, mas nao altere o limiar de confianca com base nele.
 Use market_regime: setup_score < 40 indica sem setup claro — evite abrir posicoes.
 Em ranging (ADX < 20), conservador com novas entradas; em trending (ADX >= 25), setups tem maior probabilidade.
 
@@ -214,9 +214,9 @@ Regras para open_position:
 - tp_percentage: risco/retorno minimo 1:2 em relacao ao sl_percentage
 - confianca minima: {min_confidence}
 
-Em caso de duvida, nao abra posicao — mas sempre explique seu raciocinio em texto.\
-IMPORTANTE: Voce DEVE sempre escrever um paragrafo explicando sua analise e decisao, 
-independentemente de acionar ou nao uma tool. Sem texto de analise a resposta e invalida.\\
+Em caso de duvida, nao abra posicao.
+
+IMPORTANTE: Voce DEVE sempre escrever um paragrafo explicando sua analise e decisao, independentemente de acionar ou nao uma tool. Sem texto de analise a resposta e invalida.
 """
 
 
