@@ -8,7 +8,7 @@ import logging
 from src.config import SL_EARLY_EXIT_THRESHOLD
 
 from src.application.services.market_data_service import get_market_data
-from src.application.services.notifier_service import discord_notify
+from src.infra.clients.discord.client import discord_notify
 from src.application.services.risk_orchestrator_service import open_positions
 from src.infra.agents.tools.execution.execute_sell import close_position_at_index
 

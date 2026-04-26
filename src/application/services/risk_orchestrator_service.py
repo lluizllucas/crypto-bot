@@ -14,7 +14,7 @@ from src.config import (
 from src.domain.entities.position import Position
 from src.domain.value_objects.trade_signal import SessionStats
 
-from src.application.services.notifier_service import discord_notify
+from src.infra.clients.discord.client import discord_notify
 
 from src.infra.persistence.repository import (
     load_positions,

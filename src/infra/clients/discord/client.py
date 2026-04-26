@@ -15,14 +15,14 @@ def discord_notify(title: str, message: str, color: int = 0x5865F2):
     """
     Envia uma notificacao para o canal do Discord via webhook.
     Cores homologadas:
-      0x57F287 (verde), 
-      0xED4245 (vermelho), 
-      0xFEE75C (amarelo), 
+      0x57F287 (verde),
+      0xED4245 (vermelho),
+      0xFEE75C (amarelo),
       0x5865F2 (azul)
     """
     if not DISCORD_WEBHOOK_URL:
         return
-    
+
     try:
         import requests
 

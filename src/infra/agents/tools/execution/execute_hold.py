@@ -8,7 +8,7 @@ import logging
 from src.config import TP_HOLD_MIN_CONFIDENCE, TP_EXTENSION_MULTIPLIER
 
 from src.application.services.risk_orchestrator_service import open_positions
-from src.application.services.notifier_service import discord_notify
+from src.infra.clients.discord.client import discord_notify
 
 from src.infra.persistence.repository import update_position
 from src.infra.agents.tools.execution.execute_sell import close_position_at_index

@@ -21,7 +21,7 @@ from src.config import (
 from src.domain.entities.position import Position
 
 from src.application.services.risk_orchestrator_service import open_positions, check_daily_loss_limit
-from src.application.services.notifier_service import discord_notify
+from src.infra.clients.discord.client import discord_notify
 
 from src.infra.clients.binance.client import get_balance, get_symbol_filters, adjust_qty, order_market_buy
 from src.infra.persistence.repository import save_position, save_trade, count_positions_in_db

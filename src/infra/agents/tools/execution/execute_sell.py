@@ -14,7 +14,7 @@ from src.application.services.risk_orchestrator_service import (
     session_stats,
     _record_loss,
 )
-from src.application.services.notifier_service import discord_notify
+from src.infra.clients.discord.client import discord_notify
 
 from src.infra.clients.binance.client import get_symbol_filters, adjust_qty, order_market_sell
 from src.infra.persistence.repository import delete_position, save_trade

@@ -4,17 +4,17 @@ Baixa 200 candles de 1h, calcula indicadores, range engine e Fear & Greed.
 """
 
 import logging
-
 import pandas as pd
+
 from binance.client import Client
 from binance.exceptions import BinanceAPIException
 
 from src.domain.value_objects.market_data import Candle, MarketData
 
-from src.application.services.indicators_service import add_indicators, score_setup
-from src.application.services.fear_greed_service import get_fear_greed
-
+from src.infra.clients.fear_greed.client import get_fear_greed
 from src.infra.clients.binance.client import get_klines, get_ticker
+
+from src.application.services.indicators_service import add_indicators, score_setup
 
 
 log = logging.getLogger("bot")
