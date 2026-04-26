@@ -1,14 +1,6 @@
 """
-Agente de trading via LLM (AWS Bedrock — Claude Haiku 4.5).
-
-O agente e responsavel pelo ciclo completo:
-  1. Monta contexto de mercado
-  2. Chama o LLM em loop (agentic reasoning)
-  3. Executa tools de consulta conforme o LLM pede
-  4. Executa tools de acao (buy/sell/hold) quando o LLM decide
-  5. Retorna AgentResult para o use-case apenas registrar o log
-
-O use-case nao conhece nem actions nem tool dispatching.
+Core do agente LLM: loop de raciocinio, dispatch de queries e resultado.
+Compartilhado por todos os agentes especializados.
 """
 
 import json
@@ -20,10 +12,8 @@ from datetime import datetime, timezone
 from src.domain.entities.position import Position
 from src.domain.value_objects.market_data import MarketData
 
-from src.infra.agents.schemas.tool_schemas import TOOLS_MONITOR, TOOLS_BOT, TOOLS_QUERY
-from src.infra.agents.prompts.trade_prompt import get_monitor_system_prompt, get_bot_system_prompt
+from src.infra.agents.schemas.tool_schemas import TOOLS_QUERY
 from src.infra.agents.providers.bedrock_provider import BedrockProvider, to_bedrock_tools, sanitize
-
 from src.infra.persistence.repository import get_recent_llm_decisions, get_recent_performance
 
 log = logging.getLogger("bot")
@@ -31,15 +21,8 @@ log = logging.getLogger("bot")
 _provider = BedrockProvider()
 
 _MAX_QUERY_ROUNDS = 10
-
 _QUERY_NAMES = {t["function"]["name"] for t in TOOLS_QUERY}
-_BOT_ACTION_NAMES   = {t["function"]["name"] for t in TOOLS_BOT}
-_MONITOR_ACTION_NAMES = {t["function"]["name"] for t in TOOLS_MONITOR}
 
-
-# ---------------------------------------------------------------------------
-# Resultado do agente — unica coisa que sai do agent para o use-case
-# ---------------------------------------------------------------------------
 
 @dataclass
 class AgentResult:
@@ -48,10 +31,6 @@ class AgentResult:
     executed:    bool = False
     context:     dict = field(default_factory=dict)
 
-
-# ---------------------------------------------------------------------------
-# Montagem de contexto
-# ---------------------------------------------------------------------------
 
 def build_context(data: MarketData, open_positions: dict | None = None) -> dict:
     if data.ema20 > data.ema50 > data.ema200:
@@ -64,10 +43,10 @@ def build_context(data: MarketData, open_positions: dict | None = None) -> dict:
     positions_ctx = []
     if open_positions:
         for pos in open_positions.get(data.symbol, []):
-            pnl_pct      = (data.price - pos.entry_price) / pos.entry_price * 100
-            dist_sl_pct  = (pos.entry_price - pos.sl) / pos.entry_price * 100
-            dist_tp_pct  = (pos.tp - pos.entry_price) / pos.entry_price * 100
-            hours_open   = (
+            pnl_pct     = (data.price - pos.entry_price) / pos.entry_price * 100
+            dist_sl_pct = (pos.entry_price - pos.sl) / pos.entry_price * 100
+            dist_tp_pct = (pos.tp - pos.entry_price) / pos.entry_price * 100
+            hours_open  = (
                 datetime.now(timezone.utc) -
                 (pos.ts.replace(tzinfo=timezone.utc) if pos.ts.tzinfo is None else pos.ts)
             ).total_seconds() / 3600
@@ -149,10 +128,6 @@ def build_context(data: MarketData, open_positions: dict | None = None) -> dict:
     }
 
 
-# ---------------------------------------------------------------------------
-# Dispatcher de tools de consulta
-# ---------------------------------------------------------------------------
-
 def _dispatch_query(name: str, args: dict) -> dict:
     from src.infra.agents.tools.market.get_candles import query_candles
     from src.infra.agents.tools.market.get_market_data import (
@@ -175,7 +150,6 @@ def _dispatch_query(name: str, args: dict) -> dict:
     }
 
     fn = dispatch.get(name)
-
     if fn is None:
         return {"error": f"Tool desconhecida: {name}"}
 
@@ -188,98 +162,13 @@ def _dispatch_query(name: str, args: dict) -> dict:
         return {"error": str(e)}
 
 
-# ---------------------------------------------------------------------------
-# Dispatcher de tools de acao do bot (open/sell)
-# ---------------------------------------------------------------------------
-
-def _dispatch_bot_action(name: str, args: dict, price: float, llm_log_id: str | None) -> bool:
-    from src.infra.agents.tools.execution import tool_execute_buy, tool_execute_sell
-
-    symbol     = args.get("symbol", "")
-    confidence = float(args.get("confidence", 0))
-
-    if name == "open_position":
-        return tool_execute_buy(
-            symbol=symbol,
-            confidence=confidence,
-            sl_pct=float(args.get("sl_percentage", 2.5)),
-            tp_pct=float(args.get("tp_percentage", 5.0)),
-            reason=args.get("reason", ""),
-            last_price=price,
-            llm_log_id=llm_log_id,
-        )
-
-    if name == "sell_position":
-        return tool_execute_sell(
-            symbol=symbol,
-            position_id=args.get("position_id", ""),
-            confidence=confidence,
-            reason=args.get("reason", "SELL estrategico"),
-            current_price=price,
-            exit_llm_log_id=llm_log_id,
-        )
-
-    return False
-
-
-# ---------------------------------------------------------------------------
-# Dispatcher de tools de acao do monitor (sell/hold/early_exit)
-# ---------------------------------------------------------------------------
-
-def _dispatch_monitor_action(
-    name: str,
-    args: dict,
-    pos: Position,
-    price: float,
-    llm_log_id: str | None,
-    apply_tp_hold_fn,
-    close_position_fn,
-    tp_threshold: float,
-    min_conf_early: float,
-    trigger_type: str,
-    process: str,
-) -> bool:
-    confidence = float(args.get("confidence", 0))
-
-    if args.get("position_id") != pos.db_id:
-        return False
-
-    if trigger_type == "TP":
-        if name == "sell_position":
-            close_position_fn("TAKE-PROFIT", llm_log_id)
-            return True
-        
-        if name == "hold_position":
-            if confidence >= tp_threshold:
-                log.info(f"[{process}] LLM segura no TP (conf {confidence:.2f} >= {tp_threshold:.2f}, tentativa #{pos.tp_hold_count + 1})")
-                apply_tp_hold_fn()
-            else:
-                log.info(f"[{process}] LLM quer segurar mas confianca insuficiente ({confidence:.2f} < {tp_threshold:.2f}) — vendendo")
-                close_position_fn("TAKE-PROFIT", llm_log_id)
-            return True
-
-    if trigger_type == "EARLY_EXIT" and name == "early_exit":
-        if confidence >= min_conf_early:
-            log.warning(f"[{process}] EARLY EXIT solicitado pelo LLM (conf {confidence:.2f}) @ ${price:.4f}")
-            close_position_fn("EARLY-EXIT", llm_log_id)
-        else:
-            log.info(f"[{process}] LLM quer early exit mas confianca insuficiente ({confidence:.2f} < {min_conf_early:.2f}) — mantendo")
-        return True
-
-    return False
-
-
-# ---------------------------------------------------------------------------
-# Loop principal do agente
-# ---------------------------------------------------------------------------
-
-def _run_agent(
+def run_agent(
     system:       str,
     context:      dict,
     action_tools: list,
     action_names: set,
     process:      str,
-    on_action,          # callable(name, args) -> bool
+    on_action,
 ) -> AgentResult:
     bedrock_tools = to_bedrock_tools(action_tools + TOOLS_QUERY)
     user_content  = f"Contexto de mercado atual:\n{json.dumps(context, indent=2, ensure_ascii=False)}"
@@ -301,14 +190,12 @@ def _run_agent(
                 if stop_reason != "tool_use":
                     if reasoning:
                         log.info(f"[{process}] LLM HOLD — {reasoning[:400]}")
-                        
                     return AgentResult(reasoning=reasoning, tool_called=None)
 
-                tool_uses    = [b["toolUse"] for b in output_msg["content"] if "toolUse" in b]
-                query_uses   = [u for u in tool_uses if u["name"] in _QUERY_NAMES]
-                action_uses  = [u for u in tool_uses if u["name"] in action_names]
+                tool_uses   = [b["toolUse"] for b in output_msg["content"] if "toolUse" in b]
+                query_uses  = [u for u in tool_uses if u["name"] in _QUERY_NAMES]
+                action_uses = [u for u in tool_uses if u["name"] in action_names]
 
-                # LLM decidiu uma acao — executa e encerra
                 if action_uses:
                     u        = action_uses[0]
                     executed = on_action(u["name"], u["input"])
@@ -319,7 +206,6 @@ def _run_agent(
                         context=context,
                     )
 
-                # Apenas consultas
                 if query_rounds >= _MAX_QUERY_ROUNDS:
                     log.warning(f"[{process}] Limite de {_MAX_QUERY_ROUNDS} rodadas de consulta atingido — encerrando sem acao")
                     return AgentResult(reasoning=reasoning, tool_called=None)
@@ -327,7 +213,6 @@ def _run_agent(
                 msgs.append({"role": "assistant", "content": output_msg["content"]})
 
                 tool_results = []
-                
                 for u in query_uses:
                     result = _dispatch_query(u["name"], u["input"])
                     tool_results.append({
@@ -346,80 +231,3 @@ def _run_agent(
                 log.error(f"[{process}] Erro apos 3 tentativas: {sanitize(str(e))}")
 
     return AgentResult(reasoning="", tool_called=None)
-
-
-# ---------------------------------------------------------------------------
-# API publica
-# ---------------------------------------------------------------------------
-
-def run_bot_agent(data: MarketData, open_positions: dict) -> AgentResult:
-    """
-    Ciclo principal: analisa mercado e executa buy/sell se o LLM decidir.
-    Retorna AgentResult para o use-case registrar o log.
-    """
-    context = build_context(data, open_positions)
-
-    price   = data.price
-
-    def on_action(name: str, args: dict) -> bool:
-        return _dispatch_bot_action(name, args, price, llm_log_id=None)
-
-    return _run_agent(
-        system=get_bot_system_prompt(),
-        context=context,
-        action_tools=TOOLS_BOT,
-        action_names=_BOT_ACTION_NAMES,
-        process="bot",
-        on_action=on_action,
-    )
-
-
-def run_monitor_agent(
-    data:                MarketData,
-    open_positions:      dict,
-    triggered_positions: list[Position],
-    trigger_type:        str,
-    apply_tp_hold_fn,
-    close_position_fn,
-    tp_threshold:        float,
-    min_conf_early:      float,
-) -> AgentResult:
-    """
-    Monitor de SL/TP: decide hold/sell/early_exit e executa diretamente.
-    Retorna AgentResult para o use-case registrar o log.
-    """
-    from src.config import MIN_CONFIDENCE_EARLY_EXIT
-
-    context = build_context(data, open_positions)
-
-    context["trigger_type"]        = trigger_type
-    context["triggered_positions"] = [p.db_id for p in triggered_positions]
-
-    pos = triggered_positions[0] if triggered_positions else None
-
-    def on_action(name: str, args: dict) -> bool:
-        if pos is None:
-            return False
-        
-        return _dispatch_monitor_action(
-            name=name,
-            args=args,
-            pos=pos,
-            price=data.price,
-            llm_log_id=None,
-            apply_tp_hold_fn=apply_tp_hold_fn,
-            close_position_fn=close_position_fn,
-            tp_threshold=tp_threshold,
-            min_conf_early=min_conf_early,
-            trigger_type=trigger_type,
-            process="monitor",
-        )
-
-    return _run_agent(
-        system=get_monitor_system_prompt(),
-        context=context,
-        action_tools=TOOLS_MONITOR,
-        action_names=_MONITOR_ACTION_NAMES,
-        process="monitor",
-        on_action=on_action,
-    )

@@ -11,7 +11,7 @@ from src.config import MIN_SETUP_SCORE_FOR_LLM
 from src.application.services.market_data_service import get_market_data
 from src.application.services.risk_orchestrator_service import open_positions, check_daily_loss_limit
 
-from src.infra.agents.trade_agent import run_bot_agent
+from src.infra.agents.bot_agent import run_bot_agent
 from src.infra.persistence.repository import save_llm_log
 
 log = logging.getLogger("bot")
@@ -37,8 +37,6 @@ def run_analyze_market(symbol: str) -> None:
         symbol=symbol,
         process="bot",
         context=result.context,
-        response={
-            "reasoning": result.reasoning,
-            "actions": result.tool_called,
-        }
+        response={"reasoning": result.reasoning},
+        tool_called=result.tool_called,
     )

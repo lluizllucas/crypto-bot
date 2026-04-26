@@ -3,7 +3,44 @@ Schemas JSON das tools disponibilizadas ao LLM.
 Define o que o LLM pode "chamar" — enviado no toolConfig do Bedrock.
 """
 
-TOOLS_MONITOR = [
+TOOLS_BOT = [
+    {
+        "type": "function",
+        "function": {
+            "name": "open_position",
+            "description": "Solicita abertura de nova posicao de compra.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "symbol":        {"type": "string", "description": "Par a comprar, ex: BTCUSDT"},
+                    "confidence":    {"type": "number", "description": "Confianca na decisao (0.0 a 1.0)"},
+                    "sl_percentage": {"type": "number", "description": "Stop-loss recomendado em % (1.0 a 5.0)"},
+                    "tp_percentage": {"type": "number", "description": "Take-profit recomendado em % (minimo 2x o sl_percentage)"},
+                    "reason":        {"type": "string", "description": "Justificativa objetiva em ate 2 frases"},
+                },
+                "required": ["symbol", "confidence", "sl_percentage", "tp_percentage", "reason"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "sell_position",
+            "description": "Vende uma posicao especifica por decisao estrategica (nao por SL/TP).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "position_id": {"type": "string", "description": "db_id da posicao a ser vendida"},
+                    "confidence":  {"type": "number", "description": "Confianca na decisao (0.0 a 1.0)"},
+                    "reason":      {"type": "string", "description": "Justificativa objetiva em ate 2 frases"},
+                },
+                "required": ["position_id", "confidence", "reason"],
+            },
+        },
+    },
+]
+
+TOOLS_TP = [
     {
         "type": "function",
         "function": {
@@ -36,6 +73,9 @@ TOOLS_MONITOR = [
             },
         },
     },
+]
+
+TOOLS_EARLY_EXIT = [
     {
         "type": "function",
         "function": {
@@ -45,43 +85,6 @@ TOOLS_MONITOR = [
                 "type": "object",
                 "properties": {
                     "position_id": {"type": "string", "description": "db_id da posicao a sair"},
-                    "confidence":  {"type": "number", "description": "Confianca na decisao (0.0 a 1.0)"},
-                    "reason":      {"type": "string", "description": "Justificativa objetiva em ate 2 frases"},
-                },
-                "required": ["position_id", "confidence", "reason"],
-            },
-        },
-    },
-]
-
-TOOLS_BOT = [
-    {
-        "type": "function",
-        "function": {
-            "name": "open_position",
-            "description": "Solicita abertura de nova posicao de compra.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "symbol":        {"type": "string", "description": "Par a comprar, ex: BTCUSDT"},
-                    "confidence":    {"type": "number", "description": "Confianca na decisao (0.0 a 1.0)"},
-                    "sl_percentage": {"type": "number", "description": "Stop-loss recomendado em % (1.0 a 5.0)"},
-                    "tp_percentage": {"type": "number", "description": "Take-profit recomendado em % (minimo 2x o sl_percentage)"},
-                    "reason":        {"type": "string", "description": "Justificativa objetiva em ate 2 frases"},
-                },
-                "required": ["symbol", "confidence", "sl_percentage", "tp_percentage", "reason"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "sell_position",
-            "description": "Vende uma posicao especifica por decisao estrategica (nao por SL/TP).",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "position_id": {"type": "string", "description": "db_id da posicao a ser vendida"},
                     "confidence":  {"type": "number", "description": "Confianca na decisao (0.0 a 1.0)"},
                     "reason":      {"type": "string", "description": "Justificativa objetiva em ate 2 frases"},
                 },

@@ -1,5 +1,5 @@
 """
-Port (interface) para o agente LLM.
+Port (interface) para os agentes LLM.
 Define o contrato que qualquer provedor LLM deve cumprir.
 """
 
@@ -10,26 +10,15 @@ from src.domain.entities.position import Position
 
 
 class LLMPort(Protocol):
-    """Interface para analise de mercado via LLM."""
 
-    def run_bot_agent(
-        self,
-        data: MarketData,
-        open_positions: dict,
-    ) -> object:
+    def run_bot_agent(self, data: MarketData, open_positions: dict) -> object:
         """Analise estrategica para o ciclo principal. Executa buy/sell internamente."""
         ...
 
-    def run_monitor_agent(
-        self,
-        data: MarketData,
-        open_positions: dict,
-        triggered_positions: list[Position],
-        trigger_type: str,
-        apply_tp_hold_fn,
-        close_position_fn,
-        tp_threshold: float,
-        min_conf_early: float,
-    ) -> object:
-        """Analise para o monitor SL/TP. Executa hold/sell/early_exit internamente."""
+    def run_tp_agent(self, data: MarketData, open_positions: dict, pos: Position) -> object:
+        """Decide hold ou sell quando o TP e atingido. Executa internamente."""
+        ...
+
+    def run_early_exit_agent(self, data: MarketData, open_positions: dict, pos: Position) -> object:
+        """Decide sair ou manter quando o preco se aproxima do SL. Executa internamente."""
         ...
