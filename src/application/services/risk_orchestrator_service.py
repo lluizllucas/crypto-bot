@@ -92,6 +92,7 @@ def check_daily_loss_limit() -> bool:
             f"Atencao: perda diaria em {daily_loss_usdt / MAX_DAILY_LOSS_USDT:.0%} do limite "
             f"(${daily_loss_usdt:.2f} / ${MAX_DAILY_LOSS_USDT:.2f})"
         )
+
         discord_notify(
             title="Alerta de perda diaria",
             message=(
@@ -104,15 +105,17 @@ def check_daily_loss_limit() -> bool:
     return False
 
 
-def _record_loss(amount: float):
+def record_loss(amount: float):
     """Registra perda no acumulador em memoria e persiste no banco."""
     global daily_loss_usdt, daily_loss_date
 
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
     if daily_loss_date != today:
         daily_loss_usdt = 0.0
         daily_loss_date = today
 
     daily_loss_usdt += abs(amount)
+    
     upsert_daily_loss(today, daily_loss_usdt)
 

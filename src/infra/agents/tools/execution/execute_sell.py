@@ -12,7 +12,7 @@ from src.config import MIN_CONFIDENCE
 from src.application.services.risk_orchestrator_service import (
     open_positions,
     session_stats,
-    _record_loss,
+    record_loss,
 )
 from src.infra.clients.discord.client import discord_notify
 
@@ -62,7 +62,7 @@ def close_position_at_index(
             session_stats.trades_win += 1
         else:
             session_stats.trades_loss += 1
-            _record_loss(abs(pnl))
+            record_loss(abs(pnl))
 
         level = logging.INFO if pnl >= 0 else logging.WARNING
         log.log(level,
