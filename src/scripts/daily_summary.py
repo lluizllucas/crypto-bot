@@ -16,9 +16,9 @@ from src.application.services.market_data_service import get_market_data
 from src.application.services.risk_orchestrator_service import (
     load_state,
     open_positions,
-    daily_loss_usdt,
     session_stats,
 )
+from src.infra.persistence.repository import get_daily_loss
 from src.infra.clients.binance.client import get_balance
 from src.infra.logging.setup import setup_logging
 
@@ -38,7 +38,7 @@ def run():
     log.info(f"  Operacoes hoje:     {total}")
     log.info(f"  Win rate:           {wr:.1f}% ({wins}W/{session_stats.trades_loss}L)")
     log.info(f"  PnL da sessao:      ${session_stats.pnl_total:+.4f}")
-    log.info(f"  Perda acumulada:    ${daily_loss_usdt:.2f} / ${MAX_DAILY_LOSS_USDT:.2f}")
+    log.info(f"  Perda acumulada:    ${get_daily_loss(datetime.now(timezone.utc).strftime('%Y-%m-%d')):.2f} / ${MAX_DAILY_LOSS_USDT:.2f}")
 
     total_lotes = sum(len(v) for v in open_positions.values())
     log.info(f"  Posicoes abertas:   {total_lotes} lote(s) em {len(open_positions)} par(es)")

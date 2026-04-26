@@ -7,9 +7,7 @@ import logging
 
 from datetime import datetime, timezone
 
-from src.config import (
-    MAX_DAILY_LOSS_USDT,
-)
+from src.config import MAX_DAILY_LOSS_USDT
 
 from src.domain.entities.position import Position
 from src.domain.value_objects.trade_signal import SessionStats
@@ -29,10 +27,6 @@ log = logging.getLogger("bot")
 # { "BTCUSDT": [Position, ...] }
 open_positions: dict[str, list[Position]] = {}
 
-# Perda acumulada no dia (restaurada do banco na inicializacao)
-daily_loss_usdt: float = 0.0
-daily_loss_date: str   = ""
-
 # Estatisticas da sessao
 session_stats = SessionStats(
     started_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
@@ -43,10 +37,10 @@ session_stats = SessionStats(
 
 def load_state():
     """
-    Carrega posicoes abertas e perda diaria do Supabase para a memoria.
+    Carrega posicoes abertas do Supabase para a memoria.
     Deve ser chamado uma vez ao iniciar o bot.
     """
-    global open_positions, daily_loss_usdt, daily_loss_date
+    global open_positions
 
     open_positions = load_positions()
     total = sum(len(v) for v in open_positions.values())
@@ -56,48 +50,36 @@ def load_state():
     else:
         log.info("Nenhuma posicao aberta encontrada no banco.")
 
-    # Restaura perda diaria do banco
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    daily_loss_usdt = get_daily_loss(today)
-    daily_loss_date = today
-
-    if daily_loss_usdt > 0:
-        log.info(f"Perda diaria restaurada: ${daily_loss_usdt:.2f} / ${MAX_DAILY_LOSS_USDT:.2f}")
+    daily_loss = get_daily_loss(today)
+    if daily_loss > 0:
+        log.info(f"Perda diaria restaurada: ${daily_loss:.2f} / ${MAX_DAILY_LOSS_USDT:.2f}")
 
 
 # ── Limite diario ─────────────────────────────────────────────────────────────
 
 def check_daily_loss_limit() -> bool:
     """Retorna True se o limite de perda diaria foi atingido."""
-    global daily_loss_usdt, daily_loss_date
-
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    daily_loss = get_daily_loss(today)
 
-    if daily_loss_date != today:
-        if daily_loss_date:
-            log.info(f"Novo dia -- perda acumulada resetada (era ${daily_loss_usdt:.2f})")
-        daily_loss_usdt = 0.0
-        daily_loss_date = today
-
-    if daily_loss_usdt >= MAX_DAILY_LOSS_USDT:
+    if daily_loss >= MAX_DAILY_LOSS_USDT:
         log.warning(
             f"Limite de perda diaria atingido "
-            f"(${daily_loss_usdt:.2f} / ${MAX_DAILY_LOSS_USDT:.2f}) -- sem novas ordens hoje"
+            f"(${daily_loss:.2f} / ${MAX_DAILY_LOSS_USDT:.2f}) -- sem novas ordens hoje"
         )
         return True
 
-    # Alerta de 80% do limite
-    if daily_loss_usdt >= MAX_DAILY_LOSS_USDT * 0.8:
+    if daily_loss >= MAX_DAILY_LOSS_USDT * 0.8:
         log.warning(
-            f"Atencao: perda diaria em {daily_loss_usdt / MAX_DAILY_LOSS_USDT:.0%} do limite "
-            f"(${daily_loss_usdt:.2f} / ${MAX_DAILY_LOSS_USDT:.2f})"
+            f"Atencao: perda diaria em {daily_loss / MAX_DAILY_LOSS_USDT:.0%} do limite "
+            f"(${daily_loss:.2f} / ${MAX_DAILY_LOSS_USDT:.2f})"
         )
-
         discord_notify(
             title="Alerta de perda diaria",
             message=(
-                f"Perda acumulada: **${daily_loss_usdt:.2f}** de **${MAX_DAILY_LOSS_USDT:.2f}**\n"
-                f"Limite em {daily_loss_usdt / MAX_DAILY_LOSS_USDT:.0%} — proximas perdas bloqueiam novas ordens."
+                f"Perda acumulada: **${daily_loss:.2f}** de **${MAX_DAILY_LOSS_USDT:.2f}**\n"
+                f"Limite em {daily_loss / MAX_DAILY_LOSS_USDT:.0%} — proximas perdas bloqueiam novas ordens."
             ),
             color=0xFEE75C,
         )
@@ -106,16 +88,8 @@ def check_daily_loss_limit() -> bool:
 
 
 def record_loss(amount: float):
-    """Registra perda no acumulador em memoria e persiste no banco."""
-    global daily_loss_usdt, daily_loss_date
-
+    """Acumula perda do dia no banco."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
-    if daily_loss_date != today:
-        daily_loss_usdt = 0.0
-        daily_loss_date = today
-
-    daily_loss_usdt += abs(amount)
-    
-    upsert_daily_loss(today, daily_loss_usdt)
+    current = get_daily_loss(today)
+    upsert_daily_loss(today, current + abs(amount))
 

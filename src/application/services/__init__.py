@@ -6,7 +6,6 @@ from src.application.services.risk_orchestrator_service import (
     load_state,
     check_daily_loss_limit,
     open_positions,
-    daily_loss_usdt,
     session_stats,
 )
 
@@ -19,6 +18,5 @@ __all__ = [
     "load_state",
     "check_daily_loss_limit",
     "open_positions",
-    "daily_loss_usdt",
     "session_stats",
 ]

@@ -20,7 +20,8 @@ from datetime import datetime, timezone
 
 from src.config import SYMBOLS, MAX_DAILY_LOSS_USDT, TRADE_USDT, MAX_POSITIONS_PER_SYMBOL, MIN_ENTRY_DISTANCE_PCT
 
-from src.application.services.risk_orchestrator_service import load_state, daily_loss_usdt, session_stats
+from src.application.services.risk_orchestrator_service import load_state, session_stats
+from src.infra.persistence.repository import get_daily_loss
 from src.application.use_cases.analyze_market import run_analyze_market
 from src.infra.clients.binance.client import get_balance
 from src.infra.logging.setup import setup_logging
@@ -34,7 +35,7 @@ def run_cycle():
     log.info(f"Ciclo: {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.000Z')}")
     log.info(
         f"Saldo USDT: ${get_balance('USDT'):.2f} | "
-        f"Perda hoje: ${daily_loss_usdt:.2f}/${MAX_DAILY_LOSS_USDT:.2f} | "
+        f"Perda hoje: ${get_daily_loss(datetime.now(timezone.utc).strftime('%Y-%m-%d')):.2f}/${MAX_DAILY_LOSS_USDT:.2f} | "
         f"Sessao: {session_stats.trades_win}W/{session_stats.trades_loss}L "
         f"PnL: ${session_stats.pnl_total:+.4f}"
     )
