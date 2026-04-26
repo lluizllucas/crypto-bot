@@ -2,38 +2,52 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Bot — Main Cycle",
+      "name": "Bot — Main Cycle - 15min",
       "type": "debugpy",
       "request": "launch",
-      "module": "src.bot",
+      "program": "${workspaceFolder}/src/scripts/bot.py",
       "envFile": "${workspaceFolder}/.env",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}"
-      },
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
       "console": "integratedTerminal",
       "justMyCode": false
     },
     {
-      "name": "Check SL/TP",
+      "name": "Check SL/TP - 5min",
       "type": "debugpy",
       "request": "launch",
-      "module": "src.check_sl_tp",
+      "program": "${workspaceFolder}/src/scripts/check_sl_tp.py",
       "envFile": "${workspaceFolder}/.env",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}"
-      },
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
       "console": "integratedTerminal",
       "justMyCode": false
     },
     {
-      "name": "Contexts and Tools",
+      "name": "Daily Summary - 1x/dia",
       "type": "debugpy",
       "request": "launch",
-      "module": "src.test_tools",
+      "program": "${workspaceFolder}/src/scripts/daily_summary.py",
       "envFile": "${workspaceFolder}/.env",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}"
-      },
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Weekly PnL - 1x/semana",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/scripts/weekly_pnl.py",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Audit Tools - Manual",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/scripts/audit_tools.py",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
       "console": "integratedTerminal",
       "justMyCode": false
     }
