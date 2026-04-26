@@ -13,12 +13,8 @@ from datetime import datetime, timezone
 from src.config import SYMBOLS, MAX_DAILY_LOSS_USDT
 
 from src.application.services.market_data_service import get_market_data
-from src.application.services.risk_orchestrator_service import (
-    load_state,
-    open_positions,
-    session_stats,
-)
-from src.infra.persistence.repository import get_daily_loss
+from src.application.services.risk_service import session_stats
+from src.infra.persistence.repository import get_daily_loss, load_positions
 from src.infra.clients.binance.client import get_balance
 from src.infra.logging.setup import setup_logging
 
@@ -26,6 +22,7 @@ log = setup_logging()
 
 
 def run():
+    open_positions = load_positions()
     usdt  = get_balance("USDT")
     total = session_stats.trades_total
     wins  = session_stats.trades_win
@@ -82,8 +79,6 @@ def run():
 
 
 if __name__ == "__main__":
-    load_state()
-
     try:
         run()
     except Exception:

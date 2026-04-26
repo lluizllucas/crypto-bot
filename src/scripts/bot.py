@@ -20,8 +20,8 @@ from datetime import datetime, timezone
 
 from src.config import SYMBOLS, MAX_DAILY_LOSS_USDT, TRADE_USDT, MAX_POSITIONS_PER_SYMBOL, MIN_ENTRY_DISTANCE_PCT
 
-from src.application.services.risk_orchestrator_service import load_state, session_stats
-from src.infra.persistence.repository import get_daily_loss
+from src.application.services.risk_service import session_stats
+from src.infra.persistence.repository import get_daily_loss, load_positions
 from src.application.use_cases.analyze_market import run_analyze_market
 from src.infra.clients.binance.client import get_balance
 from src.infra.logging.setup import setup_logging
@@ -60,8 +60,10 @@ if __name__ == "__main__":
     log.info("=" * 55)
 
     db.create_tables()
-    
-    load_state()
+
+    positions = load_positions()
+    total = sum(len(v) for v in positions.values())
+    log.info(f"Posicoes abertas: {total} lote(s) em {len(positions)} par(es)")
 
     try:
         run_cycle()

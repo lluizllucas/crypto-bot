@@ -10,8 +10,6 @@ import json
 
 from src.config import SYMBOLS
 
-from src.application.services.risk_orchestrator_service import load_state
-
 from src.infra.agents.tools.market.get_candles import query_candles
 from src.infra.agents.tools.portfolio.get_positions import query_positions
 from src.infra.agents.tools.market.get_market_data import (
@@ -79,8 +77,6 @@ def run():
 
 
 if __name__ == "__main__":
-    load_state()
-
     try:
         run()
     except Exception:

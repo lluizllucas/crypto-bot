@@ -73,9 +73,9 @@ mesmo que nao acione nenhuma tool. Resposta sem analise textual e invalida.
 """.format(min_confidence=MIN_CONFIDENCE, min_confidence_sell=MIN_CONFIDENCE_SELL)
 
 
-def run_bot_agent(data: MarketData, open_positions: dict) -> AgentResult:
+def run_bot_agent(data: MarketData, positions: list) -> AgentResult:
     """Analisa mercado e executa buy/sell se o LLM decidir."""
-    context = build_context(data, open_positions)
+    context = build_context(data, positions)
 
     def on_action(name: str, args: dict) -> bool:
         if name == "open_position":

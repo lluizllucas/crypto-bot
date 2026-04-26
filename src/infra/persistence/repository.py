@@ -44,6 +44,16 @@ def delete_all_positions(symbol: str) -> None:
         OpenPositionsRepository(session).delete_all_by_symbol(symbol)
 
 
+def get_positions_by_symbol(symbol: str) -> list[Position]:
+    with db.session() as session:
+        return OpenPositionsRepository(session).get_by_symbol(symbol)
+
+
+def get_position_by_id(position_id: str) -> Position | None:
+    with db.session() as session:
+        return OpenPositionsRepository(session).get_by_id(position_id)
+
+
 def count_positions_in_db(symbol: str) -> int:
     with db.session() as session:
         return OpenPositionsRepository(session).count_by_symbol(symbol)

@@ -68,12 +68,11 @@ OBRIGATORIO: Escreva um paragrafo explicando a leitura tecnica atual e a decisao
 
 
 def run_tp_agent(
-    data:           MarketData,
-    open_positions: dict,
-    pos:            Position,
+    data: MarketData,
+    pos:  Position,
 ) -> AgentResult:
     """Decide hold ou sell quando o TP e atingido."""
-    context = build_context(data, open_positions)
+    context = build_context(data, [pos])
     context["trigger_type"]       = "TP"
     context["triggered_position"] = pos.db_id
 

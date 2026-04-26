@@ -6,13 +6,11 @@ Responsabilidade aqui: carregar dados, chamar o agente, registrar o log.
 
 import logging
 
-from src.config import MIN_SETUP_SCORE_FOR_LLM
-
 from src.application.services.market_data_service import get_market_data
-from src.application.services.risk_orchestrator_service import open_positions, check_daily_loss_limit
+from src.application.services.risk_service import check_daily_loss_limit
 
 from src.infra.agents.bot_agent import run_bot_agent
-from src.infra.persistence.repository import save_llm_log
+from src.infra.persistence.repository import save_llm_log, get_positions_by_symbol
 
 log = logging.getLogger("bot")
 
@@ -27,11 +25,8 @@ def run_analyze_market(symbol: str) -> None:
         log.info(f"[{symbol}] Limite diario atingido — pulando LLM")
         return
 
-    # if data.setup_score < MIN_SETUP_SCORE_FOR_LLM and not open_positions.get(symbol):
-    #     log.info(f"[{symbol}] Setup score {data.setup_score}/100 abaixo do minimo ({MIN_SETUP_SCORE_FOR_LLM}) — pulando LLM")
-    #     return
-
-    result = run_bot_agent(data, open_positions)
+    positions = get_positions_by_symbol(symbol)
+    result = run_bot_agent(data, positions)
 
     save_llm_log(
         symbol=symbol,

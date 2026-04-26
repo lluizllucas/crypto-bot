@@ -5,37 +5,35 @@ Contem toda a logica de fechamento, PnL, persistencia e notificacao.
 
 import logging
 
+from datetime import datetime, timezone
+
 from binance.exceptions import BinanceAPIException
 
 from src.config import MIN_CONFIDENCE
 
-from src.application.services.risk_orchestrator_service import (
-    open_positions,
-    session_stats,
-    record_loss,
-)
+from src.application.services.risk_service import session_stats
+from src.infra.persistence.repository import delete_position, save_trade, get_position_by_id, get_daily_loss, upsert_daily_loss
 from src.infra.clients.discord.client import discord_notify
 
 from src.infra.clients.binance.client import get_symbol_filters, adjust_qty, order_market_sell
-from src.infra.persistence.repository import delete_position, save_trade
 
 log = logging.getLogger("bot")
 
 
-def close_position_at_index(
+def close_position_by_id(
     symbol:          str,
-    idx:             int,
+    position_id:     str,
     current_price:   float,
     reason:          str,
     exit_llm_log_id: str | None = None,
     confidence:      float = 0.0,
 ):
-    """Executa a ordem de venda, atualiza estado em memoria, persiste trade e notifica."""
-    positions = open_positions.get(symbol)
-    if not positions or idx < 0 or idx >= len(positions):
+    """Executa a ordem de venda, persiste trade e notifica."""
+    pos = get_position_by_id(position_id)
+    if not pos:
+        log.warning(f"[{symbol}] Posicao {position_id} nao encontrada no banco para fechar")
         return
 
-    pos   = positions[idx]
     entry = pos.entry_price
     qty   = pos.qty
     pnl   = (current_price - entry) * qty
@@ -45,11 +43,7 @@ def close_position_at_index(
 
     if sell_qty < min_qty or sell_qty * current_price < min_notional:
         log.warning(f"[{symbol}] Quantidade insuficiente para fechar lote ({sell_qty})")
-        if pos.db_id:
-            delete_position(pos.db_id)
-        positions.pop(idx)
-        if not positions:
-            del open_positions[symbol]
+        delete_position(position_id)
         return
 
     try:
@@ -62,7 +56,8 @@ def close_position_at_index(
             session_stats.trades_win += 1
         else:
             session_stats.trades_loss += 1
-            record_loss(abs(pnl))
+            today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            upsert_daily_loss(today, get_daily_loss(today) + abs(pnl))
 
         level = logging.INFO if pnl >= 0 else logging.WARNING
         log.log(level,
@@ -73,8 +68,7 @@ def close_position_at_index(
             f"PnL total: ${session_stats.pnl_total:+.4f}"
         )
 
-        if pos.db_id:
-            delete_position(pos.db_id)
+        delete_position(position_id)
 
         save_trade(
             symbol=          symbol,
@@ -90,10 +84,6 @@ def close_position_at_index(
             llm_log_id=      pos.llm_log_id or None,
             exit_llm_log_id= exit_llm_log_id,
         )
-
-        positions.pop(idx)
-        if not positions:
-            del open_positions[symbol]
 
         discord_notify(
             title=f"{reason} -- {symbol}",
@@ -123,11 +113,10 @@ def tool_execute_sell(
         log.info(f"[{symbol}] Confianca {confidence:.0%} abaixo do limiar -- ignorando SELL")
         return False
 
-    posicoes = open_positions.get(symbol, [])
-    for idx, pos in enumerate(posicoes):
-        if pos.db_id == position_id:
-            close_position_at_index(symbol, idx, current_price, reason, exit_llm_log_id, confidence)
-            return True
+    pos = get_position_by_id(position_id)
+    if not pos:
+        log.warning(f"[{symbol}] Posicao {position_id} nao encontrada para SELL")
+        return False
 
-    log.warning(f"[{symbol}] Posicao {position_id} nao encontrada em memoria para SELL")
-    return False
+    close_position_by_id(symbol, position_id, current_price, reason, exit_llm_log_id, confidence)
+    return True

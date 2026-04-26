@@ -11,14 +11,14 @@ from src.domain.entities.position import Position
 
 class LLMPort(Protocol):
 
-    def run_bot_agent(self, data: MarketData, open_positions: dict) -> object:
+    def run_bot_agent(self, data: MarketData, positions: list[Position]) -> object:
         """Analise estrategica para o ciclo principal. Executa buy/sell internamente."""
         ...
 
-    def run_tp_agent(self, data: MarketData, open_positions: dict, pos: Position) -> object:
+    def run_tp_agent(self, data: MarketData, pos: Position) -> object:
         """Decide hold ou sell quando o TP e atingido. Executa internamente."""
         ...
 
-    def run_early_exit_agent(self, data: MarketData, open_positions: dict, pos: Position) -> object:
+    def run_early_exit_agent(self, data: MarketData, pos: Position) -> object:
         """Decide sair ou manter quando o preco se aproxima do SL. Executa internamente."""
         ...

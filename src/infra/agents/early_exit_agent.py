@@ -59,12 +59,11 @@ OBRIGATORIO: Escreva um paragrafo explicando a leitura do momentum atual e a dec
 
 
 def run_early_exit_agent(
-    data:           MarketData,
-    open_positions: dict,
-    pos:            Position,
+    data: MarketData,
+    pos:  Position,
 ) -> AgentResult:
     """Decide sair antecipadamente ou manter quando o preco se aproxima do SL."""
-    context = build_context(data, open_positions)
+    context = build_context(data, [pos])
     
     context["trigger_type"]       = "EARLY_EXIT"
     context["triggered_position"] = pos.db_id

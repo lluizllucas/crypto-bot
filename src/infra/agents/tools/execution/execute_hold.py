@@ -7,11 +7,9 @@ import logging
 
 from src.config import TP_HOLD_MIN_CONFIDENCE, TP_EXTENSION_MULTIPLIER
 
-from src.application.services.risk_orchestrator_service import open_positions
 from src.infra.clients.discord.client import discord_notify
-
-from src.infra.persistence.repository import update_position
-from src.infra.agents.tools.execution.execute_sell import close_position_at_index
+from src.infra.persistence.repository import update_position, get_position_by_id
+from src.infra.agents.tools.execution.execute_sell import close_position_by_id
 
 log = logging.getLogger("bot")
 
@@ -21,7 +19,7 @@ def _get_tp_threshold(hold_count: int) -> float:
 
     if hold_count < len(thresholds):
         return thresholds[hold_count]
-    
+
     return thresholds[-1]
 
 
@@ -54,26 +52,24 @@ def _apply_tp_hold(symbol: str, pos) -> None:
 
 
 def tool_hold_position(symbol: str, position_id: str, confidence: float, price: float) -> bool:
-    positions = open_positions.get(symbol, [])
+    pos = get_position_by_id(position_id)
+    if not pos:
+        log.warning(f"[TP] Posicao {position_id} nao encontrada para HOLD")
+        return False
 
-    for idx, pos in enumerate(positions):
-        if pos.db_id == position_id:
-            threshold = _get_tp_threshold(pos.tp_hold_count)
+    threshold = _get_tp_threshold(pos.tp_hold_count)
 
-            if confidence >= threshold:
-                log.info(
-                    f"[TP] LLM segura no TP "
-                    f"(conf {confidence:.2f} >= {threshold:.2f}, tentativa #{pos.tp_hold_count + 1})"
-                )
-                _apply_tp_hold(symbol, pos)
-            else:
-                log.info(
-                    f"[TP] Confianca insuficiente para hold "
-                    f"({confidence:.2f} < {threshold:.2f}) — vendendo no TP"
-                )
-                close_position_at_index(symbol, idx, price, "TAKE-PROFIT")
+    if confidence >= threshold:
+        log.info(
+            f"[TP] LLM segura no TP "
+            f"(conf {confidence:.2f} >= {threshold:.2f}, tentativa #{pos.tp_hold_count + 1})"
+        )
+        _apply_tp_hold(symbol, pos)
+    else:
+        log.info(
+            f"[TP] Confianca insuficiente para hold "
+            f"({confidence:.2f} < {threshold:.2f}) — vendendo no TP"
+        )
+        close_position_by_id(symbol, position_id, price, "TAKE-PROFIT")
 
-            return True
-
-    log.warning(f"[TP] Posicao {position_id} nao encontrada para HOLD")
-    return False
+    return True

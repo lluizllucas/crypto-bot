@@ -1,15 +1,14 @@
 """
 Tool de execucao: early_exit — sai antecipadamente quando o preco se aproxima do SL.
-Reutiliza close_position_at_index com reason="EARLY-EXIT".
+Reutiliza close_position_by_id com reason="EARLY-EXIT".
 """
 
 import logging
 
 from src.config import MIN_CONFIDENCE_EARLY_EXIT
 
-from src.application.services.risk_orchestrator_service import open_positions
-
-from src.infra.agents.tools.execution.execute_sell import close_position_at_index
+from src.infra.persistence.repository import get_position_by_id
+from src.infra.agents.tools.execution.execute_sell import close_position_by_id
 
 log = logging.getLogger("bot")
 
@@ -28,16 +27,14 @@ def tool_early_exit(
         )
         return True
 
-    positions = open_positions.get(symbol, [])
-    
-    for idx, pos in enumerate(positions):
-        if pos.db_id == position_id:
-            log.warning(
-                f"[EARLY-EXIT] Saida antecipada solicitada pelo LLM "
-                f"(conf {confidence:.2f}) @ ${price:.4f}"
-            )
-            close_position_at_index(symbol, idx, price, "EARLY-EXIT", exit_llm_log_id, confidence)
-            return True
+    pos = get_position_by_id(position_id)
+    if not pos:
+        log.warning(f"[EARLY-EXIT] Posicao {position_id} nao encontrada")
+        return False
 
-    log.warning(f"[EARLY-EXIT] Posicao {position_id} nao encontrada")
-    return False
+    log.warning(
+        f"[EARLY-EXIT] Saida antecipada solicitada pelo LLM "
+        f"(conf {confidence:.2f}) @ ${price:.4f}"
+    )
+    close_position_by_id(symbol, position_id, price, "EARLY-EXIT", exit_llm_log_id, confidence)
+    return True

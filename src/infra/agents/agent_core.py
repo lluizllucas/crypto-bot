@@ -32,7 +32,7 @@ class AgentResult:
     context:     dict = field(default_factory=dict)
 
 
-def build_context(data: MarketData, open_positions: dict | None = None) -> dict:
+def build_context(data: MarketData, positions: list[Position] | None = None) -> dict:
     if data.ema20 > data.ema50 > data.ema200:
         ema_trend = "bullish"
     elif data.ema20 < data.ema50 < data.ema200:
@@ -41,8 +41,8 @@ def build_context(data: MarketData, open_positions: dict | None = None) -> dict:
         ema_trend = "neutral"
 
     positions_ctx = []
-    if open_positions:
-        for pos in open_positions.get(data.symbol, []):
+    if positions:
+        for pos in positions:
             pnl_pct     = (data.price - pos.entry_price) / pos.entry_price * 100
             dist_sl_pct = (pos.entry_price - pos.sl) / pos.entry_price * 100
             dist_tp_pct = (pos.tp - pos.entry_price) / pos.entry_price * 100

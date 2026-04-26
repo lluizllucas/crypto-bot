@@ -9,7 +9,6 @@ import sys
 from datetime import datetime, timezone
 
 from src.infra.logging.setup import setup_logging
-from src.application.services.risk_orchestrator_service import load_state
 from src.application.use_cases.monitor_positions import run_monitor_positions
 
 log = setup_logging()
@@ -22,8 +21,6 @@ if __name__ == "__main__":
     log.info(
         f"Monitor SL/TP iniciado: {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.000Z')}")
     log.info("=" * 55)
-
-    load_state()
 
     try:
         run_monitor_positions()

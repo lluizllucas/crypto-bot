@@ -9,13 +9,12 @@ from src.config import SL_EARLY_EXIT_THRESHOLD
 
 from src.application.services.market_data_service import get_market_data
 from src.infra.clients.discord.client import discord_notify
-from src.application.services.risk_orchestrator_service import open_positions
-from src.infra.agents.tools.execution.execute_sell import close_position_at_index
+from src.infra.agents.tools.execution.execute_sell import close_position_by_id
 
 from src.infra.agents.tp_agent import run_tp_agent
 from src.infra.agents.early_exit_agent import run_early_exit_agent
 from src.infra.clients.binance.client import get_current_price
-from src.infra.persistence.repository import save_llm_log
+from src.infra.persistence.repository import save_llm_log, load_positions
 
 log = logging.getLogger("bot")
 
@@ -35,18 +34,18 @@ def _get_price_with_retry(symbol: str, attempts: int = 3) -> float | None:
         message=f"Nao foi possivel obter preco apos {attempts} tentativas. Posicoes nao monitoradas neste ciclo.",
         color=0xED4245,
     )
-    
+
     return None
 
 
-def _handle_tp(symbol: str, idx: int, pos, price: float):
+def _handle_tp(symbol: str, pos, price: float):
     data = get_market_data(symbol)
     if data is None:
         log.warning(f"[MONITOR] Falha ao buscar dados de mercado — vendendo no TP")
-        close_position_at_index(symbol, idx, price, "TAKE-PROFIT")
+        close_position_by_id(symbol, pos.db_id, price, "TAKE-PROFIT")
         return
 
-    result = run_tp_agent(data=data, open_positions=open_positions, pos=pos)
+    result = run_tp_agent(data=data, pos=pos)
 
     save_llm_log(
         symbol=symbol,
@@ -59,7 +58,7 @@ def _handle_tp(symbol: str, idx: int, pos, price: float):
 
     if not result.executed:
         log.info(f"[MONITOR] [{symbol}] LLM nao acionou tool para TP — vendendo")
-        close_position_at_index(symbol, idx, price, "TAKE-PROFIT")
+        close_position_by_id(symbol, pos.db_id, price, "TAKE-PROFIT")
 
 
 def _handle_early_exit(symbol: str, pos):
@@ -67,7 +66,7 @@ def _handle_early_exit(symbol: str, pos):
     if data is None:
         return
 
-    result = run_early_exit_agent(data=data, open_positions=open_positions, pos=pos)
+    result = run_early_exit_agent(data=data, pos=pos)
 
     save_llm_log(
         symbol=symbol,
@@ -86,6 +85,7 @@ def run_monitor_positions() -> None:
     - TP atingido: run_tp_agent decide hold ou sell
     - Preco proximo do SL (80%): run_early_exit_agent decide sair ou manter
     """
+    open_positions = load_positions()
     total = sum(len(v) for v in open_positions.values())
     log.info(f"[MONITOR] Iniciando ciclo — {total} posicao(oes) abertas em {len(open_positions)} par(es)")
 
@@ -94,15 +94,12 @@ def run_monitor_positions() -> None:
         return
 
     try:
-        for symbol in list(open_positions.keys()):
+        for symbol, positions in open_positions.items():
             price = _get_price_with_retry(symbol)
             if price is None:
                 continue
 
-            positions = open_positions[symbol]
-
-            for idx in range(len(positions) - 1, -1, -1):
-                pos    = positions[idx]
+            for pos in positions:
                 entry  = pos.entry_price
                 change = (price - entry) / entry * 100
 
@@ -111,7 +108,7 @@ def run_monitor_positions() -> None:
                         f"[MONITOR] [{symbol}] STOP-LOSS @ ${price:.4f} "
                         f"(entrada ${entry:.4f}, {change:+.2f}%)"
                     )
-                    close_position_at_index(symbol, idx, price, "STOP-LOSS")
+                    close_position_by_id(symbol, pos.db_id, price, "STOP-LOSS")
                     continue
 
                 if price >= pos.tp:
@@ -119,7 +116,7 @@ def run_monitor_positions() -> None:
                         f"[MONITOR] [{symbol}] TP ATINGIDO @ ${price:.4f} "
                         f"(entrada ${entry:.4f}, {change:+.2f}%) — consultando LLM"
                     )
-                    _handle_tp(symbol, idx, pos, price)
+                    _handle_tp(symbol, pos, price)
                     continue
 
                 sl_distance_total = entry - pos.sl

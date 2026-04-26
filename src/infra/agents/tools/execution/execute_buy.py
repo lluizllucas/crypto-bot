@@ -20,47 +20,13 @@ from src.config import (
 
 from src.domain.entities.position import Position
 
-from src.application.services.risk_orchestrator_service import open_positions, check_daily_loss_limit
+from src.application.services.risk_service import check_daily_loss_limit
 from src.infra.clients.discord.client import discord_notify
 
 from src.infra.clients.binance.client import get_balance, get_symbol_filters, adjust_qty, order_market_buy
-from src.infra.persistence.repository import save_position, save_trade, count_positions_in_db
+from src.infra.persistence.repository import save_position, save_trade, count_positions_in_db, get_positions_by_symbol
 
 log = logging.getLogger("bot")
-
-
-def _register_position(symbol: str, entry_price: float, qty: float, sl_pct: float, tp_pct: float, llm_log_id: str):
-    if symbol not in open_positions:
-        open_positions[symbol] = []
-
-    sl = entry_price * (1 - sl_pct / 100)
-    tp = entry_price * (1 + tp_pct / 100)
-
-    position = Position(
-        entry_price=  entry_price,
-        qty=          qty,
-        sl=           sl,
-        tp=           tp,
-        ts=           datetime.now(timezone.utc),
-        llm_log_id=   llm_log_id,
-        original_sl=  sl,
-        original_tp=  tp,
-        tp_hold_count=0,
-    )
-
-    db_id = save_position(symbol, position)
-    if db_id:
-        position.db_id = db_id
-
-    open_positions[symbol].append(position)
-    n = len(open_positions[symbol])
-
-    log.info(
-        f"[{symbol}] Posicao registrada ({n}/{MAX_POSITIONS_PER_SYMBOL}) | "
-        f"entrada: ${entry_price:.4f} | "
-        f"SL: ${sl:.4f} (-{sl_pct}%) | "
-        f"TP: ${tp:.4f} (+{tp_pct}%)"
-    )
 
 
 def tool_execute_buy(
@@ -84,7 +50,7 @@ def tool_execute_buy(
         log.info(f"[{symbol}] Limite de posicoes no banco ({db_count}/{MAX_POSITIONS_PER_SYMBOL}) -- ignorando BUY")
         return False
 
-    posicoes = open_positions.get(symbol, [])
+    posicoes = get_positions_by_symbol(symbol)
     if posicoes:
         ultima = posicoes[-1]
         ultima_entrada = ultima.entry_price
@@ -137,7 +103,27 @@ def tool_execute_buy(
             f"ID: {order['orderId']}"
         )
 
-        _register_position(symbol, last_price, qty, sl_pct, tp_pct, llm_log_id or "")
+        position = Position(
+            entry_price=  last_price,
+            qty=          qty,
+            sl=           sl_price,
+            tp=           tp_price,
+            ts=           datetime.now(timezone.utc),
+            llm_log_id=   llm_log_id or "",
+            original_sl=  sl_price,
+            original_tp=  tp_price,
+            tp_hold_count=0,
+        )
+
+        db_id = save_position(symbol, position)
+        n = count_positions_in_db(symbol)
+
+        log.info(
+            f"[{symbol}] Posicao registrada ({n}/{MAX_POSITIONS_PER_SYMBOL}) | "
+            f"entrada: ${last_price:.4f} | "
+            f"SL: ${sl_price:.4f} (-{sl_pct}%) | "
+            f"TP: ${tp_price:.4f} (+{tp_pct}%)"
+        )
 
         save_trade(
             symbol=      symbol,
