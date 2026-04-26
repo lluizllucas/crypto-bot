@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Bot — ciclo principal",
+      "name": "Bot — Main Cycle",
       "type": "debugpy",
       "request": "launch",
       "module": "src.bot",
@@ -18,6 +18,18 @@
       "type": "debugpy",
       "request": "launch",
       "module": "src.check_sl_tp",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Contexts and Tools",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "src.test_tools",
       "envFile": "${workspaceFolder}/.env",
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
