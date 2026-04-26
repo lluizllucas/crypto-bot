@@ -24,6 +24,7 @@ from src.application.services.risk_orchestrator_service import load_state, daily
 from src.application.use_cases.analyze_market import run_analyze_market
 from src.infra.clients.binance.client import get_balance
 from src.infra.logging.setup import setup_logging
+from src.infra.persistence.database import db
 
 log = setup_logging()
 
@@ -57,6 +58,8 @@ if __name__ == "__main__":
     log.info(f"  Limite diario:         ${MAX_DAILY_LOSS_USDT}")
     log.info("=" * 55)
 
+    db.create_tables()
+    
     load_state()
 
     try:

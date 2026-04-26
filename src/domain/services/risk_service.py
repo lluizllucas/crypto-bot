@@ -9,8 +9,10 @@ from src.config import TP_HOLD_MIN_CONFIDENCE
 def tp_threshold(hold_count: int) -> float:
     """Retorna o threshold de confianca minimo para a N-esima tentativa de hold."""
     thresholds = TP_HOLD_MIN_CONFIDENCE
+
     if hold_count < len(thresholds):
         return thresholds[hold_count]
+
     return thresholds[-1]
 
 
@@ -34,13 +36,14 @@ def calc_tp_price(entry_price: float, tp_pct: float) -> float:
     return entry_price * (1 + tp_pct / 100)
 
 
-def is_near_sl(entry_price: float, sl_price: float, current_price: float,
-               threshold: float = 0.8) -> bool:
+def is_near_sl(entry_price: float, sl_price: float, current_price: float, threshold: float = 0.8) -> bool:
     """Retorna True se o preco atual esta a `threshold` do caminho ate o SL."""
     sl_distance_total = entry_price - sl_price
     sl_distance_atual = entry_price - current_price
+
     if sl_distance_total <= 0:
         return False
+
     return sl_distance_atual / sl_distance_total >= threshold
 
 

@@ -68,9 +68,17 @@ MIN_SETUP_SCORE_FOR_LLM = 40
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "")
 
 ####################################################
-#################### SUPABASE #####################
+##################### ENV ##########################
 ####################################################
 
-SUPABASE_URL = os.getenv("SUPABASE_URL",         "")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY",         "")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
+ENV = os.getenv("ENV", "production")
+
+####################################################
+#################### POSTGRES #####################
+####################################################
+
+POSTGRES_HOST     = os.getenv("POSTGRES_HOST",     "localhost")
+POSTGRES_PORT     = os.getenv("POSTGRES_PORT",     "5432")
+POSTGRES_DB       = os.getenv("POSTGRES_DB",       "cryptobot")
+POSTGRES_USER     = os.getenv("POSTGRES_USER",     "postgres")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "123456")

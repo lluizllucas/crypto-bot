@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:13
+    container_name: crypto_bot_postgres
+    env_file:
+      - .env
+    volumes:
+      - crypto_bot_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+
+volumes:
+  crypto_bot_postgres_data:
+    name: crypto_bot_postgres
