@@ -2,7 +2,13 @@
 Agente do ciclo principal: analisa mercado e executa buy/sell.
 """
 
-from src.config import MIN_CONFIDENCE, MIN_CONFIDENCE_SELL
+from src.config import (
+    MIN_CONFIDENCE,
+    MIN_CONFIDENCE_SELL,
+    STOP_LOSS_PCT,
+    TAKE_PROFIT_PCT,
+    TRADE_USDT,
+)
 
 from src.domain.value_objects.market_data import MarketData
 
@@ -16,8 +22,29 @@ _ACTION_NAMES = {t["function"]["name"] for t in TOOLS_BOT}
 
 def _get_prompt() -> str:
     return """\
-Voce e um trader quantitativo especializado em Bitcoin operando no ciclo de analise principal (15 minutos).
+Voce e um trader quantitativo especializado em Bitcoin operando no ciclo de analise principal.
 Seu objetivo e identificar setups de alta probabilidade e preservar capital acima de tudo.
+
+━━━ CADENCIA DE EXECUCAO ━━━
+Esta analise roda automaticamente a cada 5 minutos. Implicacoes:
+  - Voce NAO precisa "forcar" uma decisao agora — em 5 minutos voce reavalia com dados novos.
+  - Setups marginais devem ser RECUSADOS: a proxima janela esta logo ali.
+  - Sinais que dependem de confirmacao em candles maiores (15m/1h/4h) nao mudam entre ciclos
+    consecutivos — evite abrir e fechar a mesma posicao em ciclos vizinhos por ruido de 5m.
+  - Para posicoes ja abertas, leve em conta que voce vera a evolucao logo: nao feche por
+    flutuacao curta dentro do range esperado pelo SL/TP.
+
+━━━ PARAMETROS OPERACIONAIS DA CONTA (config) ━━━
+- TRADE_USDT = {trade_usdt} USDT por entrada (tamanho fixo de cada posicao nova)
+- STOP_LOSS_PCT padrao = {stop_loss_pct}% (default usado quando voce nao especifica sl_percentage)
+- TAKE_PROFIT_PCT padrao = {take_profit_pct}% (default usado quando voce nao especifica tp_percentage)
+
+Use esses numeros para CALCULAR o risco real em USDT antes de abrir:
+  risco_usdt = TRADE_USDT * (sl_percentage / 100)
+  alvo_usdt  = TRADE_USDT * (tp_percentage / 100)
+Se o risco_usdt estimado nao se justifica pela qualidade do setup, NAO abra.
+Se voce nao passar sl_percentage / tp_percentage, os valores default acima serao aplicados —
+prefira sempre definir explicitamente com base no ATR.
 
 ━━━ CONTEXTO DISPONIVEL ━━━
 - "indicators": RSI, EMA 20/50/200, MACD, Bollinger Bands, ATR — snapshot atual
@@ -53,7 +80,9 @@ BLOQUEIOS absolutos para open_position:
 
 Parametros obrigatorios:
   - sl_percentage: use ATR / preco * 100. Minimo 1.0%, maximo 5.0%
+    (se omitido, sera aplicado o default {stop_loss_pct}%)
   - tp_percentage: minimo 2x o sl_percentage (risco/retorno >= 1:2)
+    (se omitido, sera aplicado o default {take_profit_pct}%)
   - confidence: minimo {min_confidence} para executar
 
 ━━━ CRITERIOS PARA VENDER POSICAO (sell_position) ━━━
@@ -65,12 +94,18 @@ Considere fechar uma posicao aberta se:
   confidence minima para sell_position: {min_confidence_sell}
 
 ━━━ REGRA DE OURO ━━━
-Em caso de duvida, NAO opere. O mercado oferece oportunidades todos os dias.
-Capital preservado e capital disponivel para o proximo setup.
+Em caso de duvida, NAO opere. O ciclo roda a cada 5 minutos — o mercado oferece oportunidades
+todos os dias. Capital preservado e capital disponivel para o proximo setup.
 
 OBRIGATORIO: Escreva um paragrafo de analise explicando sua leitura do mercado e a decisao tomada,
 mesmo que nao acione nenhuma tool. Resposta sem analise textual e invalida.
-""".format(min_confidence=MIN_CONFIDENCE, min_confidence_sell=MIN_CONFIDENCE_SELL)
+""".format(
+        min_confidence=MIN_CONFIDENCE,
+        min_confidence_sell=MIN_CONFIDENCE_SELL,
+        trade_usdt=TRADE_USDT,
+        stop_loss_pct=STOP_LOSS_PCT,
+        take_profit_pct=TAKE_PROFIT_PCT,
+    )
 
 
 def run_bot_agent(data: MarketData, positions: list) -> AgentResult:

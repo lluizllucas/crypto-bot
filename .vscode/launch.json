@@ -42,10 +42,20 @@
       "justMyCode": false
     },
     {
-      "name": "Audit Tools - Manual",
+      "name": "Audit Query Tools - Manual",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/scripts/audit_tools.py",
+      "program": "${workspaceFolder}/src/scripts/audit_query_tools.py",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Audit Execution Tools - Manual",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/scripts/audit_execution_tools.py",
       "envFile": "${workspaceFolder}/.env",
       "env": { "PYTHONPATH": "${workspaceFolder}" },
       "console": "integratedTerminal",

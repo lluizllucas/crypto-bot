@@ -34,13 +34,13 @@ SYMBOLS = ["BTCUSDT"]
 ##################### TRADING ######################
 ####################################################
 
-TRADE_USDT = 50.0
+TRADE_USDT = 100.0
 
 MAX_POSITIONS_PER_SYMBOL = 3
 MIN_ENTRY_DISTANCE_PCT = 0.5
 
-STOP_LOSS_PCT = 2.5
-TAKE_PROFIT_PCT = 5.0
+STOP_LOSS_PCT = 2.0
+TAKE_PROFIT_PCT = 2.0
 
 MAX_DAILY_LOSS_USDT = 20.0
 
