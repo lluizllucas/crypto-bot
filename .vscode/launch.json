@@ -2,26 +2,62 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Bot — ciclo principal",
+      "name": "Bot — Main Cycle - 15min",
       "type": "debugpy",
       "request": "launch",
-      "module": "src.bot",
+      "program": "${workspaceFolder}/src/scripts/bot.py",
       "envFile": "${workspaceFolder}/.env",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}"
-      },
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
       "console": "integratedTerminal",
       "justMyCode": false
     },
     {
-      "name": "Check SL/TP",
+      "name": "Check SL/TP - 5min",
       "type": "debugpy",
       "request": "launch",
-      "module": "src.check_sl_tp",
+      "program": "${workspaceFolder}/src/scripts/check_sl_tp.py",
       "envFile": "${workspaceFolder}/.env",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}"
-      },
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Daily Summary - 1x/dia",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/scripts/daily_summary.py",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Weekly PnL - 1x/semana",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/scripts/weekly_pnl.py",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Audit Query Tools - Manual",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/scripts/audit_query_tools.py",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Audit Execution Tools - Manual",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/scripts/audit_execution_tools.py",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
       "console": "integratedTerminal",
       "justMyCode": false
     }
