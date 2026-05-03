@@ -123,7 +123,10 @@ def build_context(data: MarketData, positions: list[Position] | None = None) -> 
             "setup_score": data.setup_score,
         },
         "open_positions":     positions_ctx,
-        "llm_memory":         get_recent_llm_decisions(data.symbol, limit=5),
+        "llm_memory":         [
+            {**entry, "reason": entry.get("reason") or "HOLD sem reasoning registrado"}
+            for entry in get_recent_llm_decisions(data.symbol, limit=5)
+        ],
         "recent_performance": get_recent_performance(data.symbol, limit=10),
     }
 
