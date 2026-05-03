@@ -219,9 +219,10 @@ def run_agent(
                 for u in query_uses:
                     result = _dispatch_query(u["name"], u["input"])
                     tool_results.append({
-                        "type":      "toolResult",
-                        "toolUseId": u["toolUseId"],
-                        "content":   json.dumps(result, ensure_ascii=False),
+                        "toolResult": {
+                            "toolUseId": u["toolUseId"],
+                            "content":   [{"json": result}],
+                        }
                     })
 
                 msgs.append({"role": "user", "content": tool_results})
