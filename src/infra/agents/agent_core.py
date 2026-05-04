@@ -5,9 +5,19 @@ Compartilhado por todos os agentes especializados.
 
 import json
 import logging
+import uuid
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+
+
+class _Encoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, uuid.UUID):
+            return str(o)
+        if isinstance(o, datetime):
+            return o.isoformat()
+        return super().default(o)
 
 from src.domain.entities.position import Position
 from src.domain.value_objects.market_data import MarketData
@@ -174,7 +184,7 @@ def run_agent(
     on_action,
 ) -> AgentResult:
     bedrock_tools = to_bedrock_tools(action_tools + TOOLS_QUERY)
-    user_content  = f"Contexto de mercado atual:\n{json.dumps(context, indent=2, ensure_ascii=False)}"
+    user_content  = f"Contexto de mercado atual:\n{json.dumps(context, indent=2, ensure_ascii=False, cls=_Encoder)}"
     messages      = [{"role": "user", "content": [{"text": user_content}]}]
 
     for attempt in range(1, 4):
