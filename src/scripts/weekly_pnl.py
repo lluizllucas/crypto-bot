@@ -9,7 +9,9 @@ import os
 from datetime import datetime, timedelta, timezone
 
 from src.domain.entities.trade import Trade
-from src.infra.persistence.repository import get_trades_since
+from src.infra.persistence.repository import get_trades_since, load_positions, get_daily_loss
+from src.infra.clients.discord.client import discord_notify
+from src.infra.clients.binance.client import get_balance
 
 from src.infra.logging.setup import setup_logging
 
@@ -76,6 +78,72 @@ def run():
 
     log.info(f"\n  PnL GLOBAL DA SEMANA: ${total_pnl_global:+.4f}")
     log.info("=" * 55)
+
+    _send_weekly_discord(trades, by_symbol, total_pnl_global, now, week_start)
+
+
+def _send_weekly_discord(trades, by_symbol, total_pnl_global, now, week_start):
+    usdt         = get_balance("USDT")
+    open_positions = load_positions()
+    total_lotes  = sum(len(v) for v in open_positions.values())
+
+    lucro_total  = sum(t.pnl for t in trades if t.pnl > 0)
+    perda_total  = sum(t.pnl for t in trades if t.pnl < 0)
+    total_ops    = len(trades)
+    wins         = [t for t in trades if t.pnl > 0]
+    wr           = len(wins) / total_ops * 100 if total_ops > 0 else 0
+
+    lines = []
+
+    lines.append(f"**Periodo:** {week_start.strftime('%Y-%m-%d')} a {now.strftime('%Y-%m-%d')}")
+    lines.append(f"**Saldo USDT atual:** ${usdt:.2f}")
+    lines.append(f"**Operacoes:** {total_ops} — {len(wins)}W / {total_ops - len(wins)}L — Win rate: {wr:.1f}%")
+    lines.append(f"**Lucro bruto:** ${lucro_total:+.4f}   |   **Perda bruta:** ${perda_total:+.4f}")
+    lines.append(f"**PnL liquido da semana:** ${total_pnl_global:+.4f}")
+
+    for sym, sym_trades in by_symbol.items():
+        sym_wins   = [t for t in sym_trades if t.pnl > 0]
+        sym_losses = [t for t in sym_trades if t.pnl <= 0]
+        sym_pnl    = sum(t.pnl for t in sym_trades)
+        sym_wr     = len(sym_wins) / len(sym_trades) * 100 if sym_trades else 0
+
+        lines.append(
+            f"\n**{sym}** — {len(sym_trades)} ops | {len(sym_wins)}W/{len(sym_losses)}L | "
+            f"WR {sym_wr:.0f}% | PnL ${sym_pnl:+.4f}"
+        )
+
+        for t in sym_trades:
+            hora  = t.created_at.strftime("%m/%d %H:%M") if t.created_at else "??/??"
+            emoji = "✓" if t.pnl >= 0 else "✗"
+            lines.append(
+                f"  {emoji} `{hora}` {t.action} — "
+                f"${t.entry_price:.4f}→${t.exit_price:.4f} | ${t.pnl:+.4f}"
+            )
+
+    lines.append(f"\n**Posicoes abertas:** {total_lotes} lote(s) em {len(open_positions)} par(es)")
+
+    for symbol, positions in open_positions.items():
+        for pos in positions:
+            try:
+                from src.application.services.market_data_service import get_market_data
+                data = get_market_data(symbol)
+                preco_atual = data.price if data else pos.entry_price
+            except Exception:
+                preco_atual = pos.entry_price
+            pnl_est = (preco_atual - pos.entry_price) * pos.qty
+            change  = (preco_atual - pos.entry_price) / pos.entry_price * 100
+            lines.append(
+                f"  `{symbol}` entrada ${pos.entry_price:.4f} → ${preco_atual:.4f} "
+                f"({change:+.2f}%) | PnL est. ${pnl_est:+.4f} | SL ${pos.sl:.4f} TP ${pos.tp:.4f}"
+            )
+
+    color = 0x57F287 if total_pnl_global >= 0 else 0xED4245
+    
+    discord_notify(
+        title=f"Relatorio Semanal — {week_start.strftime('%m/%d')} a {now.strftime('%m/%d/%Y')}",
+        message="\n".join(lines),
+        color=color,
+    )
 
 
 if __name__ == "__main__":

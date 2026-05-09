@@ -24,6 +24,7 @@ def _get_tp_threshold(hold_count: int) -> float:
 
 
 def _apply_tp_hold(symbol: str, pos) -> None:
+    sl_anterior    = pos.sl
     pos.tp_hold_count += 1
 
     if pos.tp_hold_count == 1:
@@ -35,17 +36,22 @@ def _apply_tp_hold(symbol: str, pos) -> None:
 
     update_position(pos)
 
+    lucro_garantido = (pos.sl - pos.entry_price) * pos.qty
+
     log.info(
         f"[{symbol}] TP hold #{pos.tp_hold_count} aplicado | "
-        f"Novo SL: ${pos.sl:.4f} | Novo TP: ${pos.tp:.4f}"
+        f"Novo SL: ${pos.sl:.4f} | Novo TP: ${pos.tp:.4f} | "
+        f"Lucro garantido pelo SL: ${lucro_garantido:+.4f}"
     )
 
     discord_notify(
         title=f"TP Hold #{pos.tp_hold_count} -- {symbol}",
         message=(
             f"**LLM segurou no TP** (tentativa {pos.tp_hold_count})\n"
-            f"**Novo SL:** ${pos.sl:.4f}\n"
-            f"**Novo TP:** ${pos.tp:.4f}"
+            f"**Entrada:** ${pos.entry_price:.4f}\n"
+            f"**SL anterior:** ${sl_anterior:.4f} → **Novo SL:** ${pos.sl:.4f}\n"
+            f"**Novo TP:** ${pos.tp:.4f}\n"
+            f"**Lucro garantido pelo SL:** ${lucro_garantido:+.4f}"
         ),
         color=0x5865F2,
     )

@@ -32,9 +32,13 @@ def tool_early_exit(
         log.warning(f"[EARLY-EXIT] Posicao {position_id} nao encontrada")
         return False
 
+    pnl_realizado = (price - pos.entry_price) * pos.qty
+
     log.warning(
         f"[EARLY-EXIT] Saida antecipada solicitada pelo LLM "
-        f"(conf {confidence:.2f}) @ ${price:.4f}"
+        f"(conf {confidence:.2f}) @ ${price:.4f} | "
+        f"entrada: ${pos.entry_price:.4f} | "
+        f"PnL realizado: ${pnl_realizado:+.4f}"
     )
     close_position_by_id(symbol, position_id, price, "EARLY-EXIT", exit_llm_log_id, confidence)
     return True
