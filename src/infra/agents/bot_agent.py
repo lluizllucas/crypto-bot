@@ -38,10 +38,11 @@ Implicacoes diretas para sua decisao:
 
 ━━━ PARAMETROS OPERACIONAIS ━━━
 - TRADE_USDT = {trade_usdt} USDT por posicao
-- SL default = {stop_loss_pct}% | TP default = {take_profit_pct}% (prefira definir com base no ATR)
 - Risco por trade: ~{trade_usdt} * (sl% / 100) USDT — dimensionado e fixo
-- Voce PODE e DEVE ajustar tp_percentage acima do default para buscar risco/retorno >= 1:2
-  Exemplo: sl=2% → tp minimo recomendado = 4% (nao fique em 1:1 sem motivo tecnico claro)
+- Valores de referencia: SL {stop_loss_pct}% | TP {take_profit_pct}% — use como ponto de partida.
+  Ajuste com base na sua analise do ATR, volatilidade recente e estrutura do mercado.
+- Regra inegociavel: tp_percentage >= 2x sl_percentage (R:R minimo 1:2)
+- Limites absolutos: sl minimo 0.5%, sl maximo 5.0%, tp minimo 1.0%, tp maximo 10.0%
 
 ━━━ CONTEXTO DISPONIVEL ━━━
 - indicators: RSI, EMA 20/50/200, MACD, Bollinger Bands, ATR
@@ -81,8 +82,8 @@ BLOQUEIOS absolutos (esses sao inegociaveis):
 
 Parametros obrigatorios ao abrir:
   - confidence: minimo {min_confidence} (se abaixo, nao execute — mas revise se o threshold faz sentido para o setup)
-  - sl_percentage: baseado em ATR. Minimo 1.0%, maximo 5.0%
-  - tp_percentage: minimo 2x o sl (risco/retorno >= 1:2 e obrigatorio)
+  - sl_percentage: baseado na sua analise. Minimo 0.5%, maximo 5.0%
+  - tp_percentage: minimo 2x o sl (R:R >= 1:2 e obrigatorio)
 
 ━━━ CRITERIOS PARA VENDER POSICAO ━━━
 Considere fechar antecipadamente se:
