@@ -8,6 +8,7 @@ import logging
 
 from src.application.services.market_data_service import get_market_data
 from src.application.services.risk_service import check_daily_loss_limit
+from src.config import MIN_SETUP_SCORE_FOR_LLM
 
 from src.infra.agents.bot_agent import run_bot_agent
 from src.infra.persistence.repository import save_llm_log, get_positions_by_symbol
@@ -19,6 +20,10 @@ def run_analyze_market(symbol: str) -> None:
     data = get_market_data(symbol)
 
     if not data:
+        return
+
+    if data.setup_score < MIN_SETUP_SCORE_FOR_LLM:
+        log.info(f"[{symbol}] setup_score {data.setup_score} < {MIN_SETUP_SCORE_FOR_LLM} — pulando LLM")
         return
 
     if check_daily_loss_limit():

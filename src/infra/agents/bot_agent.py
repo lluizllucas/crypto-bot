@@ -5,6 +5,7 @@ Agente do ciclo principal: analisa mercado e executa buy/sell.
 from src.config import (
     MIN_CONFIDENCE,
     MIN_CONFIDENCE_SELL,
+    MIN_SETUP_SCORE_FOR_LLM,
     STOP_LOSS_PCT,
     TAKE_PROFIT_PCT,
     TRADE_USDT,
@@ -41,7 +42,7 @@ Implicacoes diretas para sua decisao:
 - Risco por trade: ~{trade_usdt} * (sl% / 100) USDT — dimensionado e fixo
 - Valores de referencia: SL {stop_loss_pct}% | TP {take_profit_pct}% — use como ponto de partida.
   Ajuste com base na sua analise do ATR, volatilidade recente e estrutura do mercado.
-- Regra inegociavel: tp_percentage >= 2x sl_percentage (R:R minimo 1:2)
+- Regra inegociavel: tp_percentage >= 1.5x sl_percentage (R:R minimo 1:1.5)
 - Limites absolutos: sl minimo 0.5%, sl maximo 5.0%, tp minimo 1.0%, tp maximo 10.0%
 
 ━━━ CONTEXTO DISPONIVEL ━━━
@@ -51,7 +52,7 @@ Implicacoes diretas para sua decisao:
 - ranges: posicao do preco nos ranges de 24h, 7d, 30d
 - market_regime: ADX, DI+/DI-, regime (trending/ranging), setup_score 0-100
 - open_positions: posicoes com PnL%, distancia ao SL/TP, horas abertas
-- llm_memory: suas ultimas decisoes — use para evitar repeticao de erros, nao como justificativa para inacao
+- llm_memory: suas ultimas decisoes — use para aprendizado, nao como bloqueio automatico. Um stop normal nao e um erro; erros sao entradas sem fundamento tecnico que se repetem.
 - recent_performance: contexto historico de win_rate e PnL
 
 Ferramentas de consulta disponiveis (use antes de decidir se precisar de mais dados):
@@ -67,23 +68,28 @@ Avalie por peso, nao por checklist rigido. Criterios fortes sozinhos podem justi
     - setup_score >= 60 (pre-filtro quantitativo indica confluencia alta)
 
   CRITERIOS DE SUPORTE (somam convicao):
-    - RSI entre 40-65 com direcao ascendente (momentum nascente, nao sobrecomprado)
+    - RSI entre 40-65 com direcao ascendente (momentum nascente)
+      Excecao trending: se ADX >= 40 e DI+ > DI-, RSI ate 75 e momentum sustentado — nao e sobrecompra
     - MACD histogram positivo ou virando positivo (momentum confirmando)
-    - Volume ratio >= 1.0 (compradores presentes — abaixo de 0.5 e sinal fraco)
+    - Volume ratio: abaixo de 0.3 e sinal fraco real (liquidez ausente); de 0.3 a 1.0 e contextual.
+      Sessao asiatica (00h-08h UTC) tem volume estruturalmente menor — nao penalize por isso.
+      Acima de 1.0 confirma compradores presentes e adiciona convicao.
     - Preco proximo ao suporte do range 24h ou rompendo resistencia com volume
 
   REGRA PRATICA: 1 criterio forte + 2 de suporte = entrada valida. Analise o conjunto.
 
+NOTA TRENDING: em regime trending (ADX >= 40, DI+ > DI-), o mercado pode sustentar RSI alto por horas.
+Nao confunda RSI 65-75 com sobrecompra nesses ciclos — e momentum. Avalie EMA, DI+/DI- e ADX antes de recusar.
+
 BLOQUEIOS absolutos (esses sao inegociaveis):
-  - setup_score < 40
-  - RSI > 75 (sobrecomprado extremo)
+  - setup_score < {min_setup_score}
+  - RSI > 75 (sobrecomprado extremo — valido em qualquer regime)
   - Posicao aberta no mesmo par com PnL < -1.5% ha menos de 4h (averaging down proibido)
-  - 2+ erros consecutivos documentados em llm_memory para o mesmo par
 
 Parametros obrigatorios ao abrir:
   - confidence: minimo {min_confidence} (se abaixo, nao execute — mas revise se o threshold faz sentido para o setup)
   - sl_percentage: baseado na sua analise. Minimo 0.5%, maximo 5.0%
-  - tp_percentage: minimo 2x o sl (R:R >= 1:2 e obrigatorio)
+  - tp_percentage: minimo 1.5x o sl (R:R >= 1:1.5 e obrigatorio)
 
 ━━━ CRITERIOS PARA VENDER POSICAO ━━━
 Considere fechar antecipadamente se:
@@ -103,6 +109,7 @@ Seja especifico: cite os indicadores que pesaram mais e por que. Resposta sem an
 """.format(
         min_confidence=MIN_CONFIDENCE,
         min_confidence_sell=MIN_CONFIDENCE_SELL,
+        min_setup_score=MIN_SETUP_SCORE_FOR_LLM,
         trade_usdt=TRADE_USDT,
         stop_loss_pct=STOP_LOSS_PCT,
         take_profit_pct=TAKE_PROFIT_PCT,
