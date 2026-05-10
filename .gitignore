@@ -12,3 +12,6 @@ venv/
 
 # Variáveis de ambiente
 .env
+
+# Atelier — coordenação local
+.atelier/

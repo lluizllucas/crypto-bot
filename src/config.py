@@ -8,7 +8,7 @@ load_dotenv()
 ################### OPERAÇÃO #######################
 ####################################################
 
-MIN_CONFIDENCE = 0.75
+MIN_CONFIDENCE = 0.65
 MIN_CONFIDENCE_SELL = 0.70
 
 ####################################################
@@ -34,15 +34,15 @@ SYMBOLS = ["BTCUSDT"]
 ##################### TRADING ######################
 ####################################################
 
-TRADE_USDT = 100.0
+TRADE_USDT = 30.0
 
-MAX_POSITIONS_PER_SYMBOL = 10
+MAX_POSITIONS_PER_SYMBOL = 3
 MIN_ENTRY_DISTANCE_PCT = 0.5
 
 STOP_LOSS_PCT = 1.5
-TAKE_PROFIT_PCT = 3.0
+TAKE_PROFIT_PCT = 2.5
 
-MAX_DAILY_LOSS_USDT = 20.0
+MAX_DAILY_LOSS_USDT = 25.0
 
 ####################################################
 ################# TP PROGRESSIVO ###################
@@ -59,7 +59,7 @@ MIN_CONFIDENCE_EARLY_EXIT = 0.70
 AVERAGING_DOWN_BLOCK_HOURS = 4
 AVERAGING_DOWN_MIN_PNL_PCT = -1.0
 
-MIN_SETUP_SCORE_FOR_LLM = 40
+MIN_SETUP_SCORE_FOR_LLM = 45
 
 ####################################################
 ##################### DISCORD ######################
